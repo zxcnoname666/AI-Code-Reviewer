@@ -474,7 +474,8 @@ async function analyzeFileAST(path: string, context: ToolContext): Promise<strin
 
 async function findFunctionCallers(funcName: string, _filePath: string, context: ToolContext): Promise<string> {
   // For now, use grep to find callers
-  // TODO: Integrate with call graph when analyzing all files
+  // NOTE: For detailed analysis with full context and type info, use analyze_function_impact instead
+  // TODO: Integrate with call graph when analyzing all files (low priority - grep works well)
   let output = '';
 
   // Use -F for fixed string search to avoid regex special chars issues
@@ -1021,7 +1022,21 @@ async function analyzeFunctionImpact(
           lines.push(`${marker} ${String(i).padStart(4, ' ')} | ${lineContent}`);
         }
 
-        lines.push('```\n');
+        lines.push('```');
+
+        // Extract and show types for TypeScript/JavaScript files
+        if (file.match(/\.(ts|tsx|js|jsx)$/)) {
+          const typeInfo = extractTypeInformation(fileContent, fileLines, lineNum, funcName);
+          if (typeInfo.length > 0) {
+            lines.push('');
+            lines.push('**Type Information**:');
+            for (const info of typeInfo) {
+              lines.push(`- \`${info.variable}\`: ${info.type}`);
+            }
+          }
+        }
+
+        lines.push('');
         shownCount++;
       }
     } catch (error) {
@@ -1049,6 +1064,123 @@ async function analyzeFunctionImpact(
   }
 
   return lines.join('\n');
+}
+
+/**
+ * Extract type information from code around function call
+ */
+function extractTypeInformation(
+  fileContent: string,
+  fileLines: string[],
+  callLineNum: number,
+  funcName: string
+): Array<{ variable: string; type: string }> {
+  const typeInfo: Array<{ variable: string; type: string }> = [];
+
+  // Get the call line
+  const callLine = fileLines[callLineNum - 1] || '';
+
+  // Extract variables/properties used in the function call
+  // Match: funcName(arg1, arg2.prop, arg3[0], ...)
+  const callMatch = callLine.match(new RegExp(`${funcName}\\s*\\(([^)]+)\\)`));
+  if (!callMatch) return typeInfo;
+
+  const argsText = callMatch[1];
+  // Split by comma, but be careful with nested calls
+  const args = argsText.split(',').map(a => a.trim());
+
+  // Search context for type information (±50 lines)
+  const searchStart = Math.max(0, callLineNum - 50);
+  const searchEnd = Math.min(fileLines.length, callLineNum);
+  const contextLines = fileLines.slice(searchStart, searchEnd);
+
+  for (const arg of args) {
+    if (!arg) continue;
+
+    // Extract the base variable name (e.g., "item" from "item.quantity")
+    const baseVar = arg.split('.')[0].split('[')[0].trim();
+
+    if (!baseVar || baseVar.match(/^['"`\d]/) || baseVar === 'this') {
+      // Skip literals and 'this'
+      continue;
+    }
+
+    // Look for type annotations in context
+    const typePatterns = [
+      // const/let/var name: Type = ...
+      new RegExp(`(?:const|let|var)\\s+${escapeRegExp(baseVar)}\\s*:\\s*([^=;\\n]+)`, 'i'),
+      // function param: name: Type
+      new RegExp(`[,(]\\s*${escapeRegExp(baseVar)}\\s*:\\s*([^,)=\\n]+)`, 'i'),
+      // interface/type property
+      new RegExp(`${escapeRegExp(baseVar)}\\s*:\\s*([^;,\\n]+);?`, 'i'),
+    ];
+
+    let foundType: string | null = null;
+
+    for (const line of contextLines) {
+      for (const pattern of typePatterns) {
+        const match = line.match(pattern);
+        if (match) {
+          foundType = match[1].trim();
+          break;
+        }
+      }
+      if (foundType) break;
+    }
+
+    if (foundType) {
+      // Clean up the type (remove comments, extra whitespace)
+      foundType = foundType.replace(/\/\/.+$/, '').trim();
+
+      // For property access like item.quantity, try to infer the property type
+      if (arg.includes('.')) {
+        const parts = arg.split('.');
+        if (parts.length === 2) {
+          const propName = parts[1].trim();
+          // Try to find the interface/type definition
+          const interfacePattern = new RegExp(
+            `(?:interface|type)\\s+${escapeRegExp(foundType)}\\s*[={]([^}]+)}`,
+            'is'
+          );
+          const interfaceMatch = fileContent.match(interfacePattern);
+
+          if (interfaceMatch) {
+            const interfaceBody = interfaceMatch[1];
+            const propPattern = new RegExp(`${escapeRegExp(propName)}\\s*[?:]\\s*([^;,\\n]+)`, 'i');
+            const propMatch = interfaceBody.match(propPattern);
+
+            if (propMatch) {
+              typeInfo.push({
+                variable: arg,
+                type: propMatch[1].trim() + ` (from ${foundType})`,
+              });
+              continue;
+            }
+          }
+
+          // If not found in interface, just show the base type
+          typeInfo.push({
+            variable: baseVar,
+            type: foundType,
+          });
+        }
+      } else {
+        typeInfo.push({
+          variable: arg,
+          type: foundType,
+        });
+      }
+    }
+  }
+
+  return typeInfo;
+}
+
+/**
+ * Escape special regex characters
+ */
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /**

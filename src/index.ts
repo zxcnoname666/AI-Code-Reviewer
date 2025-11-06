@@ -163,7 +163,7 @@ async function run(): Promise<void> {
           process.cwd()
         );
 
-        chunkReviews.push(`## Chunk ${i + 1}: ${chunk.reason}\n\n${chunkReview}`);
+        chunkReviews.push(`## Chunk ${i + 1}: ${chunk.reason}\n\nFiles:\n\`\`\`\n${chunk.files.map(f => f.filename).join('\n')}\n\`\`\`\n\n${chunkReview}`);
       }
 
       // Combine reviews
