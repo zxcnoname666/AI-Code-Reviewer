@@ -1,118 +1,97 @@
-# 🤖 AI Code Review - Advanced Analysis
+# 🤖 AI Code Review - GitHub Action with Deep Static Analysis
 
 <div align="center">
 
-![AI Code Review Banner](https://img.shields.io/badge/AI_Code_Review-Advanced_Analysis-purple?style=for-the-badge&logo=github-actions)
+[![GitHub stars](https://img.shields.io/github/stars/zxcnoname666/AI-Code-Review?style=social)](https://github.com/zxcnoname666/AI-Code-Review/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/zxcnoname666/AI-Code-Review?style=social)](https://github.com/zxcnoname666/AI-Code-Review/network/members)
+[![GitHub issues](https://img.shields.io/github/issues/zxcnoname666/AI-Code-Review)](https://github.com/zxcnoname666/AI-Code-Review/issues)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub Action](https://img.shields.io/badge/GitHub-Action-blue?logo=github-actions)](https://github.com/marketplace/actions)
 
-**AI-Powered Code Review | Deep Static Analysis | Beautiful Statistics**
+**Automated AI-powered code review for GitHub Pull Requests**  
+*GPT-5 • Claude Opus 4 • Gemini 2.5 Pro • O3 • Custom AI Models*
 
-[![GitHub Release](https://img.shields.io/github/v/release/zxcnoname666/AI-Code-Review?style=flat-square&logo=github)](https://github.com/zxcnoname666/AI-Code-Review/releases)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
-[![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen?style=flat-square)](https://nodejs.org)
-
-[Quick Start](#-quick-start) • [Features](#-features) • [Configuration](#-configuration) • [Examples](#-example-output) • [Development](#-development)
+[🚀 Quick Start](#-quick-start) • [✨ Features](#-key-features) • [📖 Documentation](#-configuration-options) • [💡 Examples](#-example-reviews) • [🤝 Contributing](#-contributing)
 
 </div>
 
 ---
 
-## 📋 Overview
+## 🎯 What is AI Code Review?
 
-**AI Code Review** is a next-generation GitHub Action that transforms pull request reviews through **advanced AI analysis** and **deep code understanding**. Compatible with the latest AI models including **GPT-5**, **Claude Opus 4**, **Gemini 2.5 Pro**, **O3**, and custom endpoints, it provides Principal/Staff-level code reviews with AST parsing, linter integration, dependency tracking, and stunning visual statistics.
+**AI Code Review** is a next-generation GitHub Action that automates pull request reviews using advanced artificial intelligence and deep static code analysis. Get **Principal/Staff engineer-level** feedback on every PR with AST parsing, linter integration, dependency tracking, and beautiful visual statistics.
 
-### 🎯 Why AI Code Review?
+### 🏆 Why Choose AI Code Review?
 
-- 🧠 **Senior-Level Reviews** - AI thinks like a Principal engineer with 15+ years experience
-- 🔍 **Deep Analysis** - AST parsing, complexity metrics, call graphs, dependency tracking
-- 🎨 **Beautiful Stats** - ASCII charts, sparklines, quality scores, and visual reports
-- 🛠️ **Tool-Powered** - AI actively investigates code with 14 specialized analysis tools
-- 🌍 **Multi-Language** - Reviews in any language (English, Russian, Spanish, etc.)
-- 📦 **Smart Chunking** - Handles massive PRs efficiently without hitting token limits
-- 🤖 **Multi-Model Support** - GPT-5, Claude 4, Gemini 2.5 Pro, O3, or your own endpoint
+✅ **Save 2-4 hours per day** on code reviews  
+✅ **Catch bugs before production** with deep analysis  
+✅ **Consistent quality standards** across your team  
+✅ **Support for 10+ programming languages**  
+✅ **Works with GPT-5, Claude 4, Gemini, O3, and custom AI models**  
+✅ **AST parsing + Linter integration + Dependency analysis**
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-### 🧠 **AI-Powered Intelligence**
+### 🧠 **Senior-Level AI Reviews**
+- AI analyzes code like a Principal engineer with 15+ years of experience
+- Deep understanding of architecture, performance, and security
+- Provides detailed "why" explanations, not just "what"
+- Recognizes good code and best practices
 
-- **Latest AI Models**: GPT-5, Claude Opus 4, Gemini 2.5 Pro, O3/O4 reasoning models
-- **Custom Endpoints**: Azure OpenAI, AWS Bedrock, local models, or any OpenAI-compatible API
-- **Tool Calling System**: AI uses 14 specialized analysis tools to investigate code
-- **AI-Generated Summary**: Automatically generates concise executive summaries of detailed reviews
-- **Multi-Language Support**: Review comments and summaries in any language
-- **Senior-Level Feedback**: Principal/Staff engineer perspective with deep "why" explanations
-- **Context-Aware**: Understands commit history, PR context, and code evolution
+### 🔍 **Deep Static Code Analysis**
+- **AST Parsing**: Extract functions, classes, and dependencies from any language
+- **Linter Integration**: Auto-runs ESLint, Pylint, Rust Clippy, C# Analyzers
+- **Dependency Tracking**: Maps function calls and dependencies across codebase
+- **Complexity Metrics**: Cyclomatic complexity and maintainability index
+- **Call Graph Analysis**: Understand function relationships and breaking changes
 
-### 🔍 **Advanced Code Analysis**
-
-- **AST Parsing**: Extract functions, classes, dependencies from any language
-- **Linter Integration**: Auto-runs ESLint, Pylint, Rust Clippy, C# Analyzers, and custom linters
-- **Custom Linter Support**: Integrate any linter with simple configuration
-- **Dependency Tracking**: Maps function calls and dependencies across the codebase
-- **Complexity Metrics**: Cyclomatic complexity, maintainability index
-- **Call Graph Analysis**: Understand function relationships and impact
-- **Multi-Language**: TypeScript, JavaScript, Python, Rust, C#, Go, and more
-
-### 📊 **Beautiful Statistics & AI Summary**
-
+### 🎨 **Beautiful Visual Reports**
 ```
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃                                                                     ┃
-┃    🤖  𝗔𝗜 𝗖𝗢𝗗𝗘 𝗥𝗘𝗩𝗜𝗘𝗪 - 𝗔𝗡𝗔𝗟𝗬𝗦𝗜𝗦 𝗖𝗢𝗠𝗣𝗟𝗘𝗧𝗘  🤖          ┃
-┃                                                                     ┃
-┃         ⚡ Powered by Advanced AI & Deep Code Analysis ⚡          ┃
-┃                                                                     ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-
-## 📋 Executive Summary
-This PR refactors the authentication module to improve security and maintainability.
-Key changes include migrating from JWT to OAuth 2.0, adding rate limiting, and
-improving error handling. Two minor issues found related to logging and edge cases,
-but overall the changes significantly enhance the security posture.
-**Verdict**: ✅ APPROVED with minor suggestions
-
-## 📊 Review Overview
 ┌─────────────────────────────────────────────────────────────┐
-│  Files Reviewed      │ 15                                    │
-│  Total Lines Changed │ 450                                   │
-│  Lines Added         │ +320                                  │
-│  Lines Deleted       │ -130                                  │
-│  Review Time         │ 45s                                   │
-│  Tokens Used         │ 8,450                                 │
-│  Quality Score       │ ████████████████░░░░ 85/100          │
+│ Files Reviewed    │ 15                                      │
+│ Quality Score     │ ████████████████░░░░ 85/100             │
+│ Issues Found      │ Critical: 0 | Warnings: 2 | Info: 1     │
 └─────────────────────────────────────────────────────────────┘
-
-## 🎯 Issues Found
-Critical  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 0
-Warnings  ████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 2
-Info      ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 1
-
-## 🎚️ Average Complexity
-┌─────────────────────────────────────────┐
-│  ✅ LOW            4.5                  │
-│  ░░░░░░░░░█░░░░░░░░░░░░░░░░░░░░░░░░░   │
-│  0                                  30+ │
-└─────────────────────────────────────────┘
 ```
+- ASCII charts and sparklines
+- Quality scores and visual statistics
+- Trend analysis over time
 
-### 🎯 **Smart Features**
+### 🤖 **Multi-Model Support**
+- **OpenAI**: GPT-5, GPT-5-High, O3, O3-Mini
+- **Anthropic**: Claude Opus 4, Claude Sonnet 4
+- **Google**: Gemini 2.5 Pro, Gemini 2.5 Flash
+- **Custom Endpoints**: Azure OpenAI, AWS Bedrock, local models, or any OpenAI-compatible API
 
+### 🛠️ **AI Tool System (14 Tools)**
+AI actively investigates your code using specialized tools:
+- `read_file`, `get_file_diff`, `analyze_file_ast` - Deep file analysis
+- `analyze_function_impact` - 🎯 **Breaking change detector!** Shows full context around ALL function call sites
+- `find_function_callers`, `find_function_dependencies` - Code navigation
+- `analyze_function_complexity` - Complexity metrics
+- `run_linter` - Execute language-specific linters
+- `get_commits_list`, `get_commit_diff`, `get_file_history` - Git context
+- ...and more!
+
+### 🌍 **Multi-Language Support**
+- **Review Language**: Comments in any language (English, Russian, Spanish, French, German, Chinese, etc.)
+- **Code Languages**: TypeScript, JavaScript, Python, Rust, C#, Go, Java, PHP, Ruby, and more
+
+### 📦 **Smart PR Handling**
 - **Intelligent Chunking**: Splits large PRs optimally by module boundaries
+- **Handles massive PRs** without hitting token limits
 - **Silent Mode**: Reduce notification spam for your team
 - **Auto Labeling**: Manages PR labels based on review results
-- **Inline Comments**: Issues posted on specific lines with code context
-- **Severity Levels**: Filter by critical, warning, info
-- **Historical Context**: Analyzes file and commit history for better context
 
 ---
 
 ## 🚀 Quick Start
 
-### Basic Setup
+### Step 1: Create Workflow File
 
-Create `.github/workflows/ai-review.yml`:
+Create `.github/workflows/ai-code-review.yml`:
 
 ```yaml
 name: AI Code Review
@@ -122,101 +101,55 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  review:
+  ai-review:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
-
+    
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Important for commit history
+          fetch-depth: 0  # Important for commit history analysis
 
-      - name: AI Code Review
+      - name: Run AI Code Review
         uses: zxcnoname666/AI-Code-Review@v1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 ```
 
-### Setup with /review Command Support
+### Step 2: Add OpenAI API Key
 
-Trigger reviews manually with `/review` command in PR comments:
+1. Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys)
+2. Go to your repository **Settings** → **Secrets and variables** → **Actions**
+3. Click **New repository secret**
+4. Name: `OPENAI_API_KEY`, Value: `your-api-key-here`
 
-```yaml
-name: AI Code Review
+### Step 3: Create a Pull Request
 
-on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-  issue_comment:
-    types: [created]
-
-jobs:
-  review:
-    runs-on: ubuntu-latest
-    # Only run on PR comments that contain /review
-    if: |
-      (github.event_name == 'pull_request') ||
-      (github.event_name == 'issue_comment' &&
-       github.event.issue.pull_request &&
-       contains(github.event.comment.body, '/review'))
-    permissions:
-      contents: read
-      pull-requests: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: AI Code Review
-        uses: zxcnoname666/AI-Code-Review@v1
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-```
-
-Now you can trigger reviews by commenting `/review` on any PR!
-
-### Advanced Configuration
-
-```yaml
-- name: AI Code Review
-  uses: zxcnoname666/AI-Code-Review@v1
-  with:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-    OPENAI_API_MODEL: 'gpt-5'        # Latest model
-    REVIEW_LANGUAGE: 'ru'            # Review in Russian
-    SILENT_MODE: 'true'              # Reduce notifications
-    ENABLE_AST: 'true'               # Deep code analysis
-    ENABLE_LINTERS: 'true'           # Run linters
-    MAX_CHUNK_SIZE: '8000'           # Larger chunks
-```
+That's it! 🎉 AI Code Review will automatically analyze every new PR.
 
 ---
 
-## ⚙️ Configuration
+## 📖 Configuration Options
 
 ### Required Inputs
 
-| Input | Description |
-|-------|-------------|
-| `GITHUB_TOKEN` | GitHub token (auto-provided by Actions) |
+| Input | Description | Default |
+|-------|-------------|---------|
+| `GITHUB_TOKEN` | GitHub token (auto-provided by Actions) | - |
+| `OPENAI_API_KEY` | OpenAI API key or compatible provider | - |
 
 ### Optional Inputs
 
 | Input | Description | Default |
 |-------|-------------|---------|
-| `OPENAI_API_KEY` | OpenAI API key (or compatible provider) | - |
-| `OPENAI_API_MODEL` | Model name (`gpt-5`, `gpt-5-high`, `o3`, `o3-mini`, etc.) | `gpt-5` |
-| `OPENAI_API_BASE_URL` | Custom endpoint (Azure, AWS Bedrock, local) | `https://api.openai.com/v1` |
-| `REVIEW_LANGUAGE` | Review language (`en`, `ru`, `es`, `fr`, `de`, etc.) | `en` |
-| `SILENT_MODE` | Minimize email notifications | `false` |
+| `OPENAI_API_MODEL` | AI model (`gpt-5`, `claude-opus-4`, `o3`, etc.) | `gpt-5` |
+| `OPENAI_API_BASE_URL` | Custom endpoint (Azure, Bedrock, local) | `https://api.openai.com/v1` |
+| `REVIEW_LANGUAGE` | Review language (`en`, `ru`, `es`, `fr`, `de`, `zh`, etc.) | `en` |
+| `SILENT_MODE` | Minimize email notifications (`true`/`false`) | `false` |
 | `MAX_CHUNK_SIZE` | Max tokens per chunk (adjust for your model) | `6000` |
 | `ENABLE_LINTERS` | Run language-specific linters | `true` |
 | `ENABLE_AST` | AST analysis for deep code understanding | `true` |
@@ -225,110 +158,47 @@ Now you can trigger reviews by commenting `/review` on any PR!
 
 ---
 
-## 📖 How It Works
+## 💡 Example Reviews
 
-### 1. Fetch PR Context
-- Retrieves PR details, branch info, and linked issues
-- Analyzes file types and programming languages
-- Builds commit history timeline
+<details>
+<summary>🔍 Click to see example review output</summary>
 
-### 2. Smart Chunking
-- Splits large PRs intelligently by module boundaries
-- Groups related files together
-- Optimizes token usage for your chosen model
-
-### 3. Deep Analysis (14 Tools)
-The AI actively investigates code using specialized tools:
-
-**File Analysis:**
-- `read_file` - Read complete file content with syntax highlighting
-- `get_file_diff` - View specific changes with context lines
-- `analyze_file_ast` - Deep AST (Abstract Syntax Tree) parsing
-- `read_large_diff_chunk` - Handle massive files in manageable chunks
-
-**Code Understanding:**
-- `analyze_function_impact` - **🎯 Breaking Change Detector!** Shows full context around ALL function call sites (not just grep lines). Essential for refactoring and parameter changes.
-- `find_function_callers` - Quick list of all places where a function is called
-- `find_function_dependencies` - Find what functions/modules a function depends on
-- `analyze_function_complexity` - Cyclomatic complexity and maintainability metrics
-- `search_code` - Search patterns across entire codebase
-
-**Quality Tools:**
-- `run_linter` - Execute language-specific linters (ESLint, Pylint, Clippy, etc.)
-
-**Git & History:**
-- `get_commits_list` - List all commits in the PR with authors and messages
-- `get_commit_diff` - View full diff for a specific commit
-- `get_commit_info` - Detailed commit metadata and statistics
-- `get_file_history` - See how a file evolved over time
-- `get_pr_context` - Comprehensive PR overview with labels and reviewers
-
-### 4. AI Review
-- Uses **mandatory workflow** requiring 4-6 tools minimum per review
-- Analyzes from multiple dimensions: Security, Performance, Architecture, Maintainability
-- Provides senior-level feedback with detailed explanations
-- Recognizes good code and best practices
-
-### 5. Generate Review
-- Categorizes issues by severity (critical, warning, info)
-- Provides code examples and suggested fixes
-- Creates beautiful statistics with quality scores
-- Generates actionable feedback
-
-### 6. AI Summary Generation
-- Sends full review to AI for concise summary generation
-- Creates brief but comprehensive executive summary (under 300 words)
-- Includes: main changes, critical findings, key recommendations, verdict
-- Automatically translated to target language if configured
-
-### 7. Post to GitHub
-- Posts comprehensive review comment
-- Adds inline comments on specific lines
-- Manages labels automatically (needs-review, approved, etc.)
-- Supports silent mode to reduce notification spam
-
----
-
-## 📊 Example Output
-
-### Full Review with Statistics
-
-```markdown
+```
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃                                                                     ┃
-┃    🤖  𝗔𝗜 𝗖𝗢𝗗𝗘 𝗥𝗘𝗩𝗜𝗘𝗪 - 𝗔𝗡𝗔𝗟𝗬𝗦𝗜𝗦 𝗖𝗢𝗠𝗣𝗟𝗘𝗧𝗘  🤖          ┃
-┃                                                                     ┃
-┃         ⚡ Powered by Advanced AI & Deep Code Analysis ⚡          ┃
-┃                                                                     ┃
+┃                                                                   ┃
+┃      🤖 𝗔𝗜 𝗖𝗢𝗗𝗘 𝗥𝗘𝗩𝗜𝗘𝗪 - 𝗔𝗡𝗔𝗟𝗬𝗦𝗜𝗦 𝗖𝗢𝗠𝗣𝗟𝗘𝗧𝗘 🤖              ┃
+┃                                                                   ┃
+┃         ⚡ Powered by Advanced AI & Deep Code Analysis ⚡           ┃
+┃                                                                   ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 ## 📋 Executive Summary
-This PR implements a new caching layer for the API to reduce database load and improve
-response times. The implementation is solid with good error handling and test coverage.
-Found 2 performance optimizations and 1 suggestion for documentation, but no blocking
-issues. **Verdict**: ✅ APPROVED
+
+This PR implements a new caching layer to reduce database load and improve 
+response times. The implementation is solid with good error handling and test 
+coverage. Found 2 performance optimizations and 1 documentation suggestion.
+
+**Verdict**: ✅ APPROVED with minor suggestions
 
 ## 📊 Review Overview
+
 ┌─────────────────────────────────────────────────────────────┐
-│  Files Reviewed      │ 15                                    │
-│  Total Lines Changed │ 450 (+320/-130)                       │
-│  Commits Analyzed    │ 8                                     │
-│  Tools Used          │ 12                                    │
-│  Review Time         │ 45s                                   │
-│  Quality Score       │ ████████████████░░░░ 85/100          │
+│ Files Reviewed        │ 15                                  │
+│ Total Lines Changed   │ 450 (+320/-130)                     │
+│ Commits Analyzed      │ 8                                   │
+│ Tools Used            │ 12                                  │
+│ Review Time           │ 45s                                 │
+│ Quality Score         │ ████████████████░░░░ 85/100         │
 └─────────────────────────────────────────────────────────────┘
 
 ## 🎯 Issues Summary
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃  ⚠️  NEEDS CHANGES                        ┃
-┃  Issues: 3 | Critical: 0 | Warnings: 2   ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-Critical  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 0
-Warnings  ████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 2
-Info      ████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 1
+Critical  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  0
+Warnings  ████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░  2
+Info      ████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  1
 
 ## 🏆 Highlights
+
 ✅ Well-structured code with clear separation of concerns
 ✅ Comprehensive error handling in API endpoints
 ✅ Good use of TypeScript types for type safety
@@ -338,7 +208,7 @@ Info      ████░░░░░░░░░░░░░░░░░░░�
 ### src/api/handler.ts:45
 **Severity:** Warning | **Category:** Performance
 
-The database query inside the loop creates N+1 queries. Consider using
+The database query inside the loop creates N+1 queries. Consider using 
 a single query with JOIN or batch loading.
 
 **Current:**
@@ -357,34 +227,38 @@ const posts = await db.query(`
   WHERE u.id IN (?)
 `, [users.map(u => u.id)]);
 \`\`\`
-
----
-
-## 📁 Files Analyzed
-- ✅ src/api/handler.ts (2 issues)
-- ✅ src/utils/helpers.ts (1 issue)
-- ✅ src/types/index.ts (clean)
-- ✅ tests/api.test.ts (clean)
-
-## 🎚️ Complexity Analysis
-┌─────────────────────────────────────────┐
-│  Average Complexity: 4.5 (✅ LOW)       │
-│  ░░░░░░░░░█░░░░░░░░░░░░░░░░░░░░░░░░░   │
-│  0    5    10   15   20   25        30+ │
-│                                         │
-│  Highest: getUserWithPosts() = 8        │
-│  Location: src/api/handler.ts:23        │
-└─────────────────────────────────────────┘
-
-## 📈 Trend: Issue Severity Over Time
-▁▁▂▃▂▁▁ (Improving!)
 ```
 
+</details>
+
 ---
 
-## 🌟 Advanced Use Cases
+## 🎯 Advanced Use Cases
 
-### Use with Claude Opus 4 (Anthropic)
+### Manual Trigger with `/review` Command
+
+Add the ability to trigger reviews on-demand:
+
+```yaml
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
+
+jobs:
+  ai-review:
+    if: |
+      (github.event_name == 'pull_request') ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request &&
+       contains(github.event.comment.body, '/review'))
+    # ... rest of the workflow
+```
+
+Now comment `/review` on any PR to trigger a review!
+
+### Use Claude Opus 4
 
 ```yaml
 - uses: zxcnoname666/AI-Code-Review@v1
@@ -395,7 +269,7 @@ const posts = await db.query(`
     OPENAI_API_MODEL: 'claude-opus-4'
 ```
 
-### Use with Gemini 2.5 Pro (Google)
+### Use Google Gemini 2.5 Pro
 
 ```yaml
 - uses: zxcnoname666/AI-Code-Review@v1
@@ -407,67 +281,95 @@ const posts = await db.query(`
     MAX_CHUNK_SIZE: '12000'  # Gemini supports larger context
 ```
 
-### Use with Azure OpenAI
-
-```yaml
-- uses: zxcnoname666/AI-Code-Review@v1
-  with:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_KEY }}
-    OPENAI_API_BASE_URL: 'https://your-resource.openai.azure.com/v1'
-    OPENAI_API_MODEL: 'gpt-5'
-```
-
-### Use with O3 Reasoning Model
+### Use OpenAI O3 Reasoning Model
 
 ```yaml
 - uses: zxcnoname666/AI-Code-Review@v1
   with:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-    OPENAI_API_MODEL: 'o3-mini'  # Advanced reasoning
+    OPENAI_API_MODEL: 'o3-mini'
     MAX_CHUNK_SIZE: '10000'
 ```
 
-### Custom Linter Integration
+### Reviews in Russian
 
-Integrate your own linters programmatically:
-
-```typescript
-import { registerCustomLinter } from '@zxcnoname666/ai-code-review';
-
-// Example: Register golangci-lint
-registerCustomLinter('golangci-lint', {
-  command: 'golangci-lint',
-  args: ['run', '--out-format=json', '{file}'],
-  filePattern: '\\.go$',
-  outputFormat: 'json',
-  parser: (output) => {
-    const result = JSON.parse(output);
-    return result.Issues.map(issue => ({
-      file: issue.Pos.Filename,
-      line: issue.Pos.Line,
-      severity: issue.Severity === 'error' ? 'error' : 'warning',
-      message: issue.Text,
-      ruleId: issue.FromLinter,
-    }));
-  },
-});
+```yaml
+- uses: zxcnoname666/AI-Code-Review@v1
+  with:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    REVIEW_LANGUAGE: 'ru'  # Reviews in Russian
 ```
 
-**Supported Built-in Linters:**
-- **JavaScript/TypeScript**: ESLint
-- **Python**: Pylint
-- **Rust**: Clippy
-- **C#**: dotnet format analyzers
-- **Go**: golangci-lint (via custom integration)
-- **Any**: Configure your own!
+### Silent Mode (Reduce Notifications)
 
-### 🎯 Breaking Change Detection
+```yaml
+- uses: zxcnoname666/AI-Code-Review@v1
+  with:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    SILENT_MODE: 'true'  # Minimize email spam
+```
 
-**Use Case**: When refactoring a function that's used across multiple files, AI uses the `analyze_function_impact` tool to show full context around ALL call sites.
+---
 
-**Example**: You're changing the signature of `calculatePrice(quantity, price)` to `calculatePrice(options)`:
+## 🛠️ How It Works
+
+### 1️⃣ Data Collection
+- Retrieves PR details, branch info, and linked issues
+- Analyzes file types and programming languages
+- Builds commit history timeline
+
+### 2️⃣ Smart Chunking
+- Splits large PRs intelligently by module boundaries
+- Groups related files together
+- Optimizes token usage for your chosen AI model
+
+### 3️⃣ Deep Analysis
+AI actively investigates code using 14 specialized tools:
+
+**File Analysis:**
+- `read_file` - Read complete file content
+- `get_file_diff` - View specific changes with context
+- `analyze_file_ast` - Deep AST (Abstract Syntax Tree) parsing
+
+**Code Understanding:**
+- `analyze_function_impact` - 🎯 **Breaking Change Detector!** Shows full context around ALL function call sites
+- `find_function_callers` - List all places where a function is called
+- `find_function_dependencies` - Find what a function depends on
+- `analyze_function_complexity` - Cyclomatic complexity metrics
+
+**Quality Tools:**
+- `run_linter` - Execute language-specific linters (ESLint, Pylint, Clippy, etc.)
+
+**Git & History:**
+- `get_commits_list`, `get_commit_diff`, `get_file_history` - Analyze code evolution
+
+### 4️⃣ AI Review Process
+- Uses mandatory workflow requiring 4-6 tools minimum per review
+- Analyzes from multiple dimensions: Security, Performance, Architecture, Maintainability
+- Provides senior-level feedback with detailed explanations
+- Categorizes issues by severity (critical, warning, info)
+
+### 5️⃣ Executive Summary Generation
+- Sends full review to AI for concise summary
+- Creates brief but comprehensive executive summary (under 300 words)
+- Includes: main changes, critical findings, key recommendations, verdict
+
+### 6️⃣ Publishing Results
+- Posts comprehensive review comment
+- Adds inline comments on specific lines
+- Manages labels automatically
+- Supports silent mode to reduce notification spam
+
+---
+
+## 🔥 Breaking Change Detection Example
+
+When refactoring a function used across multiple files, AI uses `analyze_function_impact` to show **full context** around ALL call sites.
+
+**Example:** Changing `calculatePrice(quantity, price)` to `calculatePrice(options)`
 
 ```typescript
 // Before:
@@ -482,21 +384,17 @@ function calculatePrice(options: { quantity: number; price: number; discount?: n
 }
 ```
 
-**What the AI sees with `analyze_function_impact`**:
+**What AI sees:**
 
-```markdown
+```
 ## Function Impact Analysis: calculatePrice
 
-**Definition**: `src/utils/pricing.ts`
-**Context**: ±5 lines around each call
-
-### Function Definition
-**Line**: 42
+**Definition**: `src/utils/pricing.ts:42`
 **Parameters**: quantity, price
-**Async**: No
 **Exported**: Yes
 
 ### Call Sites
+
 Found **8** call site(s) across **3** file(s)
 
 ---
@@ -504,57 +402,45 @@ Found **8** call site(s) across **3** file(s)
 #### `src/components/Cart.tsx` (3 calls)
 
 **Call at line 67**:
-```tsx
-→   67 | const total = calculatePrice(item.quantity, item.price);
-    68 | setCartTotal(total);
-```
+→ 67 | const total = calculatePrice(item.quantity, item.price);
+  68 | setCartTotal(total);
 
 **Call at line 89**:
-```tsx
-    88 | items.forEach(item => {
-→   89 |   subtotal += calculatePrice(item.qty, item.unitPrice);
-    90 | });
-```
+  88 | items.forEach(item => {
+→ 89 |   subtotal += calculatePrice(item.qty, item.unitPrice);
+  90 | });
 
-### Breaking Change Analysis
-**Total Impact**: 8 call site(s) would be affected by changes to this function
+---
 
-**Recommendations**:
-- ⚠️ **Medium impact**: 8 call sites - thorough testing recommended
-- Review all call sites before changing function signature
+Total Impact: 8 call site(s) would be affected
+
+Recommendations:
+⚠️ Medium impact: 8 call sites - thorough testing recommended
 - All callers pass 2 parameters - breaking change confirmed
 - Consider backward compatibility or deprecation period
 ```
 
-The AI can now **intelligently warn** that all 8 call sites need updating!
-
-### Multi-Language Teams
-
-```yaml
-- uses: zxcnoname666/AI-Code-Review@v1
-  with:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-    REVIEW_LANGUAGE: 'ru'  # Russian reviews
-```
-
-### High-Performance Setup for Large Codebases
-
-```yaml
-- uses: zxcnoname666/AI-Code-Review@v1
-  with:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-    OPENAI_API_MODEL: 'o3'           # Best reasoning
-    MAX_CHUNK_SIZE: '15000'          # Large context
-    SILENT_MODE: 'true'
-    ENABLE_AST: 'true'
-    ENABLE_DEPENDENCY_ANALYSIS: 'true'
-```
+The AI can now **intelligently warn** that all 8 call sites need updating! 🎯
 
 ---
 
-## 🛠️ Development
+## 🌐 Supported Languages
+
+### Review Languages (Comments)
+English, Russian, Spanish, French, German, Chinese, Japanese, Korean, Portuguese, Italian, Dutch, Polish, Turkish, Arabic, Hindi, and more...
+
+### Code Analysis Languages
+- **JavaScript/TypeScript** - ESLint, AST parsing
+- **Python** - Pylint, AST parsing
+- **Rust** - Clippy, AST parsing
+- **C#** - dotnet format analyzers
+- **Go** - golangci-lint (custom integration)
+- **Java, PHP, Ruby, C++** - Basic analysis
+- **And more...**
+
+---
+
+## 🏗️ Development
 
 ### Prerequisites
 - Node.js 20+
@@ -584,48 +470,37 @@ src/
 │   ├── linter-runner.ts  # Multi-language linter runner
 │   └── call-graph.ts     # Dependency & call graph analysis
 ├── chunking/             # Smart chunking strategies
-│   └── strategy.ts       # Token-aware chunking
 ├── github/               # GitHub API integration
-│   ├── client.ts         # PR & comments API
-│   └── operations.ts     # Git operations
 ├── stats/                # Visualization & statistics
-│   └── visualizer.ts     # ASCII art, charts, reports
 └── utils/                # Utilities
-    ├── token-counter.ts  # Token estimation (tiktoken)
-    └── logger.ts         # Structured logging
 ```
 
-### Build
+### Testing
 
 ```bash
-pnpm run build        # Build with esbuild
-pnpm run type-check   # TypeScript type checking
+pnpm run build
+pnpm run type-check
 ```
 
-### Testing Locally
-
-1. Create a test repository
-2. Set up the workflow with your changes
-3. Create a pull request
-4. Verify the AI review output
+Create a test repository, set up the workflow, and verify the output.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'feat: add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
+2. Create feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'feat: add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
 5. Open Pull Request
 
 ---
 
-## 📄 License
+## 📝 License
 
-MIT License - see [LICENSE](LICENSE)
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
@@ -642,12 +517,13 @@ MIT License - see [LICENSE](LICENSE)
 
 ---
 
-## 📞 Support
+## ⭐ Support This Project
 
-- 🐛 [Report Bug](https://github.com/zxcnoname666/AI-Code-Review/issues)
-- 💡 [Request Feature](https://github.com/zxcnoname666/AI-Code-Review/issues)
-- 💬 [Discussions](https://github.com/zxcnoname666/AI-Code-Review/discussions)
-- 📖 [Documentation](https://github.com/zxcnoname666/AI-Code-Review)
+If you find AI Code Review useful, please:
+- ⭐ **Star this repository**
+- 🐛 [Report bugs or request features](https://github.com/zxcnoname666/AI-Code-Review/issues)
+- 🔀 Share with your team
+- 💬 [Join discussions](https://github.com/zxcnoname666/AI-Code-Review/discussions)
 
 ---
 
@@ -655,6 +531,6 @@ MIT License - see [LICENSE](LICENSE)
 
 **Made with ❤️ by [zxcnoname666](https://github.com/zxcnoname666)**
 
-⭐ Star this repo if you find it useful!
+[⬆ Back to top](#-ai-code-review---github-action-with-deep-static-analysis)
 
 </div>
