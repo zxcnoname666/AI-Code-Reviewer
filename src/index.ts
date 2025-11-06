@@ -18,7 +18,7 @@ async function run(): Promise<void> {
   const startTime = Date.now();
 
   try {
-    info('🚀 Starting AI Code Review Tool v3.0');
+    info('🚀 Starting AI Code Review Tool v1.0');
     info('═'.repeat(60));
 
     // ====== 1. Parse Configuration ======

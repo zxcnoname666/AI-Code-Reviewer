@@ -1,6 +1,6 @@
 {
   "name": "@zxcnoname666/ai-code-review",
-  "version": "3.0.0",
+  "version": "1.0.0",
   "description": "Advanced AI-powered code review tool for GitHub with deep code analysis, multi-language support, and beautiful statistics",
   "main": "dist/out.js",
   "scripts": {

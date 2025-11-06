@@ -27,11 +27,13 @@ export function generateStatisticsReport(stats: ReviewStatistics, issues: Review
  */
 function generateHeader(): string {
   return `
-╔══════════════════════════════════════════════════════════════════════╗
-║                                                                      ║
-║        🤖  AI CODE REVIEW - ANALYSIS COMPLETE  🤖                    ║
-║                                                                      ║
-╚══════════════════════════════════════════════════════════════════════╝
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                                                     ┃
+┃    🤖  𝗔𝗜 𝗖𝗢𝗗𝗘 𝗥𝗘𝗩𝗜𝗘𝗪 - 𝗔𝗡𝗔𝗟𝗬𝗦𝗜𝗦 𝗖𝗢𝗠𝗣𝗟𝗘𝗧𝗘  🤖          ┃
+┃                                                                     ┃
+┃         ⚡ Powered by Advanced AI & Deep Code Analysis ⚡          ┃
+┃                                                                     ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 `;
 }
 
@@ -57,7 +59,7 @@ function generateOverviewSection(stats: ReviewStatistics): string {
 }
 
 /**
- * Generate issues chart
+ * Generate issues chart with sparkline
  */
 function generateIssuesChart(stats: ReviewStatistics): string {
   const lines: string[] = [];
@@ -71,18 +73,37 @@ function generateIssuesChart(stats: ReviewStatistics): string {
     1
   );
 
-  const criticalBar = generateBar(stats.criticalIssues, maxIssues, 40, '🔴');
-  const warningBar = generateBar(stats.warningIssues, maxIssues, 40, '⚠️');
-  const infoBar = generateBar(stats.infoIssues, maxIssues, 40, '📘');
+  const criticalBar = generateBar(stats.criticalIssues, maxIssues, 40, '█');
+  const warningBar = generateBar(stats.warningIssues, maxIssues, 40, '█');
+  const infoBar = generateBar(stats.infoIssues, maxIssues, 40, '█');
+
+  // Calculate percentages
+  const total = stats.criticalIssues + stats.warningIssues + stats.infoIssues;
+  const criticalPct = total > 0 ? Math.round((stats.criticalIssues / total) * 100) : 0;
+  const warningPct = total > 0 ? Math.round((stats.warningIssues / total) * 100) : 0;
+  const infoPct = total > 0 ? Math.round((stats.infoIssues / total) * 100) : 0;
 
   lines.push('```');
-  lines.push(`Critical  ${criticalBar} ${stats.criticalIssues}`);
-  lines.push(`Warnings  ${warningBar} ${stats.warningIssues}`);
-  lines.push(`Info      ${infoBar} ${stats.infoIssues}`);
-  lines.push('                                              ');
-  lines.push(`Total Issues: ${stats.issuesFound}`);
-  lines.push(`Files with Issues: ${stats.filesWithIssues}/${stats.totalFiles}`);
+  lines.push('┌─────────────────────────────────────────────────────────┐');
+  lines.push(`│ 🔴 Critical   ${criticalBar}  ${String(stats.criticalIssues).padStart(3)} (${String(criticalPct).padStart(2)}%) │`);
+  lines.push(`│ ⚠️  Warnings   ${warningBar}  ${String(stats.warningIssues).padStart(3)} (${String(warningPct).padStart(2)}%) │`);
+  lines.push(`│ 📘 Info       ${infoBar}  ${String(stats.infoIssues).padStart(3)} (${String(infoPct).padStart(2)}%) │`);
+  lines.push('├─────────────────────────────────────────────────────────┤');
+  lines.push(`│ Total Issues: ${stats.issuesFound.toString().padEnd(42)} │`);
+  lines.push(`│ Files Affected: ${stats.filesWithIssues}/${stats.totalFiles}${' '.repeat(38 - (stats.filesWithIssues.toString() + stats.totalFiles.toString()).length)} │`);
+  lines.push('└─────────────────────────────────────────────────────────┘');
   lines.push('```');
+
+  // Add sparkline visualization
+  if (stats.issuesFound > 0) {
+    const sparkline = generateSparkline([
+      stats.criticalIssues,
+      stats.warningIssues,
+      stats.infoIssues,
+    ]);
+    lines.push('');
+    lines.push(`**Trend**: ${sparkline} (Critical → Warning → Info)`);
+  }
 
   return lines.join('\n');
 }
@@ -323,20 +344,74 @@ function getCategoryIcon(category: string): string {
 }
 
 /**
- * Generate summary badge
+ * Generate sparkline from values
+ */
+function generateSparkline(values: number[]): string {
+  if (values.length === 0) return '';
+
+  const max = Math.max(...values, 1);
+  const sparkChars = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'];
+
+  return values
+    .map(v => {
+      const index = Math.min(
+        Math.floor((v / max) * (sparkChars.length - 1)),
+        sparkChars.length - 1
+      );
+      return sparkChars[index];
+    })
+    .join('');
+}
+
+/**
+ * Generate progress bar with percentage
+ */
+function generateProgressBar(value: number, max: number, width: number = 20): string {
+  const percentage = max > 0 ? (value / max) * 100 : 0;
+  const filled = Math.round((percentage / 100) * width);
+  const empty = width - filled;
+
+  return `[${'█'.repeat(filled)}${'░'.repeat(empty)}] ${Math.round(percentage)}%`;
+}
+
+/**
+ * Generate summary badge with enhanced visualization
  */
 export function generateSummaryBadge(stats: ReviewStatistics): string {
-  const status = stats.criticalIssues > 0 ? '🔴 NEEDS ATTENTION' : stats.warningIssues > 0 ? '⚠️ REVIEW NEEDED' : '✅ LOOKS GOOD';
+  let status = '';
+  let statusIcon = '';
+
+  if (stats.criticalIssues > 0) {
+    status = 'NEEDS IMMEDIATE ATTENTION';
+    statusIcon = '🔴';
+  } else if (stats.warningIssues > 5) {
+    status = 'SIGNIFICANT ISSUES FOUND';
+    statusIcon = '⚠️';
+  } else if (stats.warningIssues > 0) {
+    status = 'MINOR ISSUES FOUND';
+    statusIcon = '⚠️';
+  } else {
+    status = 'LOOKS GREAT';
+    statusIcon = '✅';
+  }
+
+  const qualityScore = Math.max(0, 100 - (stats.criticalIssues * 20) - (stats.warningIssues * 5) - (stats.infoIssues * 1));
+  const scoreBar = generateProgressBar(qualityScore, 100, 25);
 
   return `
-╔════════════════════════════════════════╗
-║                                        ║
-║  ${status.padEnd(38)}║
-║                                        ║
-║  Issues: ${String(stats.issuesFound).padEnd(30)}║
-║  Critical: ${String(stats.criticalIssues).padEnd(28)}║
-║  Warnings: ${String(stats.warningIssues).padEnd(28)}║
-║                                        ║
-╚════════════════════════════════════════╝
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                                       ┃
+┃  ${statusIcon}  ${status.padEnd(46)} ┃
+┃                                                       ┃
+┃  📊 Quality Score: ${scoreBar}   ┃
+┃                                                       ┃
+┃  Issues Found:                                        ┃
+┃    • Critical: ${String(stats.criticalIssues).padStart(3)} 🔴${' '.repeat(35)} ┃
+┃    • Warnings:  ${String(stats.warningIssues).padStart(3)} ⚠️${' '.repeat(35)} ┃
+┃    • Info:      ${String(stats.infoIssues).padStart(3)} 📘${' '.repeat(35)} ┃
+┃                                                       ┃
+┃  Files: ${stats.filesWithIssues}/${stats.totalFiles} affected${' '.repeat(36 - (stats.filesWithIssues.toString() + stats.totalFiles.toString()).length)} ┃
+┃                                                       ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 `;
 }

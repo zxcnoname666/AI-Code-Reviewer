@@ -1,6 +1,6 @@
-# Contributing to Release Helper
+# Contributing to AI Code Reviewer
 
-First off, thank you for considering contributing to Release Helper! 🎉 It's people like you that make this project better for everyone.
+First off, thank you for considering contributing to AI Code Reviewer! 🎉 It's people like you that make this project better for everyone.
 
 ## 🌟 Ways to Contribute
 
@@ -25,28 +25,31 @@ Before creating a bug report, please check if the issue has already been reporte
 - **Environment details**:
   - Node.js version
   - Operating system
-  - Release Helper version
+  - AI Code Reviewer version
+  - AI model being used
   - Relevant configuration
 
 **Example:**
 ```markdown
-### Bug: AI changelog generation fails with custom model
+### Bug: AI code review fails with custom model endpoint
 
 **Description:**
-When using `gpt-5-high` model, the action fails with error "Invalid model".
+When using Azure OpenAI endpoint, the action fails with error "Invalid API endpoint".
 
 **Steps to reproduce:**
-1. Configure workflow with `OPENAI_API_MODEL: gpt-5-high`
-2. Push commit with `!release: patch`
-3. Action fails
+1. Configure workflow with Azure OpenAI endpoint
+2. Set `OPENAI_API_MODEL: gpt-5`
+3. Create a pull request
+4. Action fails with authentication error
 
-**Expected:** Should use gpt-5-high model
-**Actual:** Fails with error
+**Expected:** Should use Azure OpenAI endpoint successfully
+**Actual:** Fails with 401 authentication error
 
 **Environment:**
 - Node.js: 20.10.0
 - OS: Ubuntu 22.04
-- Release Helper: v1.0.0
+- AI Code Reviewer: v1.0.0
+- Model: gpt-5 (Azure)
 ```
 
 ## 💡 Suggesting Features
@@ -66,21 +69,22 @@ Include in your feature request:
 
 **Example:**
 ```markdown
-### Feature: Support for Anthropic Claude
+### Feature: Support for DeepSeek models
 
-**Problem:** Some users prefer Claude over OpenAI GPT models
+**Problem:** DeepSeek R1 is a powerful open-source reasoning model that many teams want to use
 
-**Solution:** Add support for Anthropic API with parameters:
-- ANTHROPIC_API_KEY
-- ANTHROPIC_MODEL (claude-3-opus, claude-3-sonnet)
+**Solution:** Add support for DeepSeek API with parameters:
+- DEEPSEEK_API_KEY
+- DEEPSEEK_MODEL (deepseek-chat, deepseek-coder)
 
-**Alternatives:** 
-- Keep OpenAI only (simpler maintenance)
-- Support generic OpenAI-compatible APIs
+**Alternatives:**
+- Use OpenAI-compatible proxy
+- Only support major providers
 
 **Use cases:**
-- Users with Anthropic credits
-- Teams preferring Claude's output style
+- Teams using DeepSeek for cost savings
+- Users preferring open-source models
+- Chinese market where DeepSeek is popular
 ```
 
 ## 🔧 Pull Request Process
@@ -89,8 +93,8 @@ Include in your feature request:
 
 1. **Fork and clone the repository:**
 ```bash
-git clone https://github.com/YOUR_USERNAME/release-helper.git
-cd release-helper
+git clone https://github.com/YOUR_USERNAME/AI-Code-Reviewer.git
+cd AI-Code-Reviewer
 ```
 
 2. **Install dependencies:**
@@ -122,6 +126,7 @@ git checkout -b fix/your-bug-fix
    - Follow existing code style
    - Add comments for complex logic
    - Update documentation if needed
+   - Use `node:` prefix for built-in modules (e.g., `node:fs`, `node:path`)
 
 3. **Test your changes:**
 ```bash
@@ -132,11 +137,11 @@ pnpm run type-check
 
 4. **Commit using conventional commits:**
 ```bash
-git commit -m "feat: add support for Anthropic Claude
+git commit -m "feat: add support for DeepSeek models
 
-- Add ANTHROPIC_API_KEY configuration
-- Implement Claude API integration
-- Update documentation"
+- Add DEEPSEEK_API_KEY configuration
+- Implement DeepSeek API integration
+- Update documentation with examples"
 ```
 
 ### Submitting Pull Request
@@ -150,7 +155,7 @@ git push origin feature/your-feature-name
    - Clear title following conventional commits
    - Description of changes
    - Reference to related issues (Fixes #123)
-   - Screenshots/GIFs if UI changes
+   - Screenshots/GIFs if UI/output changes
 
 **PR Template:**
 ```markdown
@@ -166,16 +171,22 @@ Brief description of your changes
 ## Changes Made
 - Change 1
 - Change 2
+- Change 3
 
 ## Testing
 How did you test these changes?
+- [ ] Built successfully with `pnpm run build`
+- [ ] Type checking passes with `pnpm run type-check`
+- [ ] Tested with test repository
+- [ ] Verified output formatting
 
 ## Checklist
 - [ ] Code builds successfully
 - [ ] Type checking passes
-- [ ] Documentation updated
+- [ ] Documentation updated (README, CONTRIBUTING, etc.)
 - [ ] Follows conventional commits
 - [ ] No breaking changes (or documented)
+- [ ] Used `node:` prefix for Node.js built-in modules
 
 ## Related Issues
 Fixes #123
@@ -193,87 +204,124 @@ Fixes #123
 - Use TypeScript strict mode
 - Add types for all parameters and return values
 - Use interfaces for object shapes
-- Avoid `any` type
+- Avoid `any` type (use `unknown` if necessary)
+- Use `node:` prefix for Node.js built-in modules
 
 **Good:**
 ```typescript
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 interface CommitData {
   sha: string;
   message: string;
   author: string;
+  date: Date;
 }
 
-function parseCommit(data: CommitData): ParsedCommit {
+async function parseCommit(data: CommitData): Promise<ParsedCommit> {
   // implementation
 }
 ```
 
 **Bad:**
 ```typescript
-function parseCommit(data: any) {
+import fs from 'fs';  // Missing node: prefix
+import path from 'path';  // Missing node: prefix
+
+function parseCommit(data: any) {  // Using any
   // implementation
 }
 ```
 
 ### Naming Conventions
 
-- **Files:** kebab-case (`git-utils.ts`)
-- **Functions:** camelCase (`parseCommit`)
-- **Classes:** PascalCase (`CommitParser`)
-- **Constants:** UPPER_SNAKE_CASE (`DEFAULT_MODEL`)
-- **Types/Interfaces:** PascalCase (`CommitData`)
+- **Files:** kebab-case (`git-utils.ts`, `ast-parser.ts`)
+- **Functions:** camelCase (`parseCommit`, `analyzeComplexity`)
+- **Classes:** PascalCase (`CommitParser`, `ASTAnalyzer`)
+- **Constants:** UPPER_SNAKE_CASE (`DEFAULT_MODEL`, `MAX_CHUNK_SIZE`)
+- **Types/Interfaces:** PascalCase (`CommitData`, `ReviewConfig`)
 
 ### Code Organization
 
 ```typescript
-// 1. Imports
-import { readFile } from 'fs/promises';
-import type { Config } from './types';
+// 1. Imports - Node built-ins first (with node: prefix)
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 
-// 2. Types/Interfaces
+// 2. External imports
+import { exec } from '@actions/exec';
+import type { Octokit } from '@octokit/rest';
+
+// 3. Internal imports
+import type { Config, FileChange } from './types/index.js';
+
+// 4. Types/Interfaces
 interface Options {
-  // ...
+  model: string;
+  temperature: number;
 }
 
-// 3. Constants
+// 5. Constants
 const DEFAULT_TIMEOUT = 5000;
+const MAX_RETRIES = 3;
 
-// 4. Functions
-export async function processRelease(options: Options): Promise<void> {
-  // ...
+// 6. Functions
+export async function processReview(options: Options): Promise<void> {
+  // implementation
 }
 ```
 
 ### Comments
 
-- Write self-documenting code
-- Add comments for complex logic
-- Use JSDoc for public functions
+- Write self-documenting code when possible
+- Add comments for complex logic or non-obvious decisions
+- Use JSDoc for public functions and exported APIs
 
 ```typescript
 /**
- * Generates changelog from commits using AI
- * @param commits - Array of commit objects
- * @param config - AI configuration options
- * @returns Generated changelog markdown
+ * Generates a comprehensive code review using AI analysis
+ *
+ * @param files - Array of changed files in the PR
+ * @param config - AI configuration including model and temperature
+ * @param tools - Available analysis tools for the AI to use
+ * @returns Generated review with issues and statistics
+ *
+ * @example
+ * ```typescript
+ * const review = await generateReview(
+ *   changedFiles,
+ *   { model: 'gpt-5', temperature: 0.7 },
+ *   availableTools
+ * );
+ * ```
  */
-export async function generateChangelog(
-  commits: Commit[],
-  config: AIConfig
-): Promise<string> {
+export async function generateReview(
+  files: FileChange[],
+  config: AIConfig,
+  tools: AITool[]
+): Promise<ReviewResult> {
   // implementation
 }
 ```
 
 ## 🧪 Testing Guidelines
 
-Currently, testing is manual. To test your changes:
+Currently, testing is primarily manual. To test your changes:
 
-1. Create a test repository
-2. Set up Release Helper with your changes
-3. Make test commits with `!release` commands
-4. Verify releases are created correctly
-5. Check changelog quality
+1. **Create a test repository** with various file types and languages
+2. **Set up AI Code Reviewer** with your changes (use local build)
+3. **Create test PRs** with different scenarios:
+   - Small PRs (1-2 files)
+   - Large PRs (10+ files, 1000+ lines)
+   - Different languages (TypeScript, Python, Rust, etc.)
+   - PRs with linter errors
+   - PRs with complex functions
+4. **Verify the review output**:
+   - Check statistics formatting
+   - Verify tool usage by AI
+   - Confirm issue detection accuracy
+   - Test multi-language support
 
 **Future:** We plan to add automated tests. PRs adding tests are highly appreciated!
 
@@ -281,9 +329,19 @@ Currently, testing is manual. To test your changes:
 
 When making changes, update documentation:
 
-- **README.md** - For user-facing changes
+- **README.md** - For user-facing changes and features
+- **CONTRIBUTING.md** - For development process changes
 - **Code comments** - For implementation details
-- **Examples** - Add usage examples if needed
+- **JSDoc** - For public APIs
+- **Examples** - Add usage examples for new features
+
+### Documentation Standards
+
+- Use clear, concise language
+- Include code examples for features
+- Keep examples realistic and practical
+- Update configuration tables when adding parameters
+- Add screenshots for visual changes
 
 ## 🔒 Security
 
@@ -292,7 +350,8 @@ If you discover a security vulnerability:
 1. **Do NOT open a public issue**
 2. Email the maintainer privately (see SECURITY.md)
 3. Include detailed description and reproduction steps
-4. Wait for response before public disclosure
+4. Allow time for fix before public disclosure
+5. Wait for response before public disclosure
 
 ## 📜 Commit Message Guidelines
 
@@ -310,24 +369,83 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 - `feat:` - New feature
 - `fix:` - Bug fix
 - `docs:` - Documentation changes
-- `style:` - Code style changes (formatting)
-- `refactor:` - Code refactoring
+- `style:` - Code style changes (formatting, semicolons, etc.)
+- `refactor:` - Code refactoring (no functional changes)
 - `perf:` - Performance improvements
 - `test:` - Adding/updating tests
-- `build:` - Build system changes
-- `ci:` - CI configuration changes
-- `chore:` - Other changes
+- `build:` - Build system changes (esbuild, dependencies)
+- `ci:` - CI configuration changes (GitHub Actions)
+- `chore:` - Other changes (maintenance, tooling)
+
+**Scope (optional):**
+- `ai` - AI client, prompts, tools
+- `analysis` - AST, linters, complexity
+- `github` - GitHub API integration
+- `stats` - Statistics and visualization
+- `chunking` - Smart chunking logic
+- `types` - TypeScript types
 
 **Examples:**
 ```bash
-feat(ai): add support for custom system prompts
+feat(ai): add support for Claude Opus 4 model
 
-fix(git): resolve issue with merge commits parsing
+fix(analysis): resolve AST parsing error for JSX fragments
 
-docs: update configuration examples in README
+docs: update README with Gemini 2.5 Pro examples
 
-refactor(core): simplify version bumping logic
+refactor(stats): simplify complexity calculation logic
+
+perf(chunking): optimize token counting for large files
 ```
+
+## 🎯 Development Tips
+
+### Working with AI Tools
+
+When adding new tools to `src/ai/tools-registry.ts`:
+
+1. Define clear tool description (AI reads this)
+2. Use JSON Schema for parameters
+3. Implement tool function with error handling
+4. Add usage examples in prompts
+5. Test with various scenarios
+
+```typescript
+{
+  name: 'new_analysis_tool',
+  description: 'Clear description of what this tool does and when to use it',
+  parameters: {
+    type: 'object',
+    properties: {
+      file_path: {
+        type: 'string',
+        description: 'Path to the file to analyze',
+      },
+    },
+    required: ['file_path'],
+  },
+}
+```
+
+### Working with Prompts
+
+When modifying `src/ai/prompts.ts`:
+
+1. Be specific and clear
+2. Use examples to guide AI behavior
+3. Test with various PR scenarios
+4. Consider token limits
+5. Maintain senior-level perspective
+
+### Adding New Linters
+
+To add support for a new language linter in `src/analysis/linter-runner.ts`:
+
+1. Add linter detection logic
+2. Implement output parsing
+3. Map severity levels (error, warning, info)
+4. Add file type support
+5. Document in README
 
 ## 🏆 Recognition
 
@@ -336,12 +454,13 @@ Contributors are recognized in:
 - GitHub Contributors page
 - Release notes (for significant contributions)
 - README (for major features)
+- Special thanks in commit messages
 
 ## ❓ Questions?
 
 Have questions about contributing?
 
-- Open a [Discussion](https://github.com/zxcnoname666/release-helper/discussions)
+- Open a [Discussion](https://github.com/zxcnoname666/AI-Code-Reviewer/discussions)
 - Comment on existing issues
 - Reach out to maintainers
 
@@ -353,6 +472,6 @@ By contributing, you agree that your contributions will be licensed under the MI
 
 ## 🙏 Thank You!
 
-Every contribution, no matter how small, makes a difference. Thank you for helping make Release Helper better! 🚀
+Every contribution, no matter how small, makes a difference. Thank you for helping make AI Code Reviewer better! 🚀
 
 **Happy Coding!** 💻✨

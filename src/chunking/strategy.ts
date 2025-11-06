@@ -4,7 +4,7 @@
 
 import type { FileChange, Chunk, ChunkStrategy } from '../types/index.js';
 import { estimateDiffTokens, estimateTokens } from '../utils/tokens.js';
-import { extname, dirname } from 'path';
+import { extname, dirname } from 'node:path';
 
 /**
  * Default chunking strategy

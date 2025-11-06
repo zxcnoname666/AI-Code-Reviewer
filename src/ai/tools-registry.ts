@@ -3,8 +3,8 @@
  */
 
 import type { AITool, ToolCall, ToolResult, FileChange } from '../types/index.js';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { exec } from '@actions/exec';
 import { parseFile } from '../analysis/ast-parser.js';
 import { lintFile } from '../analysis/linter-runner.js';
@@ -188,6 +188,69 @@ export const AI_TOOLS: AITool[] = [
       required: ['function_name', 'file_path'],
     },
   },
+  {
+    name: 'get_commits_list',
+    description: 'Get the list of commits in the pull request with hash, author, date, and message. Essential for understanding the evolution of changes.',
+    parameters: {
+      type: 'object',
+      properties: {
+        limit: {
+          type: 'number',
+          description: 'Maximum number of commits to return (default: 50)',
+        },
+      },
+      required: [],
+    },
+  },
+  {
+    name: 'get_commit_diff',
+    description: 'Get the full diff for a specific commit by its hash. Shows all changes made in that commit.',
+    parameters: {
+      type: 'object',
+      properties: {
+        sha: {
+          type: 'string',
+          description: 'Commit SHA (can be short or full)',
+        },
+        file_path: {
+          type: 'string',
+          description: 'Optional: filter diff to specific file only',
+        },
+      },
+      required: ['sha'],
+    },
+  },
+  {
+    name: 'read_large_diff_chunk',
+    description: 'Read a portion of a large diff file in chunks to avoid token limits. Useful for reviewing very large changes.',
+    parameters: {
+      type: 'object',
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Path to the file',
+        },
+        chunk_index: {
+          type: 'number',
+          description: 'Which chunk to read (0-based index)',
+        },
+        lines_per_chunk: {
+          type: 'number',
+          description: 'Number of diff lines per chunk (default: 100)',
+        },
+      },
+      required: ['path', 'chunk_index'],
+    },
+  },
+  {
+    name: 'get_pr_context',
+    description: 'Get comprehensive context about the pull request including branch info, labels, reviewers, and linked issues.',
+    parameters: {
+      type: 'object',
+      properties: {},
+      required: [],
+    },
+  },
 ];
 
 /**
@@ -248,6 +311,18 @@ async function executeToolInternal(tool: ToolCall, context: ToolContext): Promis
 
     case 'analyze_function_complexity':
       return await analyzeFunctionComplexity(args.function_name, args.file_path, context);
+
+    case 'get_commits_list':
+      return await getCommitsList(args.limit || 50, context);
+
+    case 'get_commit_diff':
+      return await getCommitDiff(args.sha, args.file_path, context);
+
+    case 'read_large_diff_chunk':
+      return await readLargeDiffChunk(args.path, args.chunk_index, args.lines_per_chunk || 100, context);
+
+    case 'get_pr_context':
+      return await getPRContext(context);
 
     default:
       throw new Error(`Unknown tool: ${name}`);
@@ -561,6 +636,199 @@ async function analyzeFunctionComplexity(funcName: string, filePath: string, con
     lines.push('❌ High complexity - Should be refactored');
   } else {
     lines.push('🔴 Very high complexity - Refactoring required');
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * Get list of commits in the PR
+ */
+async function getCommitsList(limit: number, context: ToolContext): Promise<string> {
+  let output = '';
+
+  await exec(
+    'git',
+    ['log', `--max-count=${limit}`, '--pretty=format:%H|%an|%ae|%at|%s', `${context.baseSha}..${context.headSha}`],
+    {
+      cwd: context.workdir,
+      listeners: {
+        stdout: (data: Buffer) => {
+          output += data.toString();
+        },
+      },
+    }
+  );
+
+  if (!output.trim()) {
+    return 'No commits found in this pull request';
+  }
+
+  const lines: string[] = [];
+  lines.push('## Commits in Pull Request\n');
+  lines.push('| Hash | Author | Email | Date | Message |');
+  lines.push('|------|--------|-------|------|---------|');
+
+  const commits = output.trim().split('\n');
+  for (const commit of commits) {
+    const [hash, author, email, timestamp, ...messageParts] = commit.split('|');
+    const message = messageParts.join('|');
+    const date = new Date(parseInt(timestamp) * 1000).toISOString().split('T')[0];
+    const shortHash = hash.substring(0, 7);
+
+    lines.push(`| \`${shortHash}\` | ${author} | ${email} | ${date} | ${message} |`);
+  }
+
+  lines.push(`\n**Total commits**: ${commits.length}`);
+
+  return lines.join('\n');
+}
+
+/**
+ * Get diff for a specific commit
+ */
+async function getCommitDiff(sha: string, filePath: string | undefined, context: ToolContext): Promise<string> {
+  let output = '';
+
+  const args = ['show', '--format=%H%n%an <%ae>%n%at%n%s%n%b', sha];
+  if (filePath) {
+    args.push('--', filePath);
+  }
+
+  await exec('git', args, {
+    cwd: context.workdir,
+    listeners: {
+      stdout: (data: Buffer) => {
+        output += data.toString();
+      },
+    },
+  });
+
+  if (!output.trim()) {
+    return filePath
+      ? `No changes found in commit ${sha} for file ${filePath}`
+      : `Commit ${sha} not found`;
+  }
+
+  // Truncate if too large (> 10000 lines)
+  const lines = output.split('\n');
+  if (lines.length > 10000) {
+    const truncated = lines.slice(0, 10000).join('\n');
+    return `\`\`\`diff
+${truncated}
+
+... (truncated: commit diff was ${lines.length} lines, showing first 10000)
+Use read_large_diff_chunk to read specific files in chunks if needed.
+\`\`\``;
+  }
+
+  return `\`\`\`diff
+${output}
+\`\`\``;
+}
+
+/**
+ * Read large diff in chunks
+ */
+async function readLargeDiffChunk(
+  path: string,
+  chunkIndex: number,
+  linesPerChunk: number,
+  context: ToolContext
+): Promise<string> {
+  let output = '';
+
+  await exec(
+    'git',
+    ['diff', context.baseSha, context.headSha, '--', path],
+    {
+      cwd: context.workdir,
+      listeners: {
+        stdout: (data: Buffer) => {
+          output += data.toString();
+        },
+      },
+    }
+  );
+
+  if (!output.trim()) {
+    return `No changes found for ${path}`;
+  }
+
+  const lines = output.split('\n');
+  const totalChunks = Math.ceil(lines.length / linesPerChunk);
+
+  if (chunkIndex >= totalChunks) {
+    return `Invalid chunk index ${chunkIndex}. File has ${totalChunks} chunks (0-${totalChunks - 1})`;
+  }
+
+  const startLine = chunkIndex * linesPerChunk;
+  const endLine = Math.min(startLine + linesPerChunk, lines.length);
+  const chunk = lines.slice(startLine, endLine).join('\n');
+
+  const result: string[] = [];
+  result.push(`## Diff Chunk for: ${path}`);
+  result.push(`**Chunk**: ${chunkIndex + 1}/${totalChunks}`);
+  result.push(`**Lines**: ${startLine + 1}-${endLine} of ${lines.length}`);
+  result.push('');
+  result.push('```diff');
+  result.push(chunk);
+  result.push('```');
+
+  if (chunkIndex < totalChunks - 1) {
+    result.push('');
+    result.push(`💡 **Tip**: Use chunk_index=${chunkIndex + 1} to read the next chunk`);
+  }
+
+  return result.join('\n');
+}
+
+/**
+ * Get PR context (placeholder - would need GitHub API integration)
+ */
+async function getPRContext(context: ToolContext): Promise<string> {
+  const lines: string[] = [];
+
+  lines.push('## Pull Request Context\n');
+  lines.push(`**Base Branch**: ${context.baseSha.substring(0, 7)}`);
+  lines.push(`**Head Branch**: ${context.headSha.substring(0, 7)}`);
+  lines.push(`**Working Directory**: ${context.workdir}`);
+  lines.push(`**Files Changed**: ${context.files.length}`);
+
+  // Group files by status
+  const statuses = {
+    added: context.files.filter(f => f.status === 'added').length,
+    modified: context.files.filter(f => f.status === 'modified').length,
+    removed: context.files.filter(f => f.status === 'removed').length,
+    renamed: context.files.filter(f => f.status === 'renamed').length,
+  };
+
+  lines.push('\n**File Changes**:');
+  lines.push(`- ✅ Added: ${statuses.added}`);
+  lines.push(`- ✏️ Modified: ${statuses.modified}`);
+  lines.push(`- ❌ Removed: ${statuses.removed}`);
+  lines.push(`- ↔️ Renamed: ${statuses.renamed}`);
+
+  // Get branch info
+  let branchOutput = '';
+  try {
+    await exec('git', ['branch', '-vv'], {
+      cwd: context.workdir,
+      listeners: {
+        stdout: (data: Buffer) => {
+          branchOutput += data.toString();
+        },
+      },
+    });
+
+    if (branchOutput) {
+      lines.push('\n**Branch Info**:');
+      lines.push('```');
+      lines.push(branchOutput.trim());
+      lines.push('```');
+    }
+  } catch {
+    // Branch info not available
   }
 
   return lines.join('\n');

@@ -15,6 +15,6 @@ jobs:
           fetch-depth: 0
 
       - name: Auto Release
-        uses: zxcnoname666/release-helper@main
+        uses: zxcnoname666/AI-Code-Reviewer@main
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

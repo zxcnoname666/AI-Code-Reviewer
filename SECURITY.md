@@ -2,7 +2,7 @@
 
 ## 🔒 Reporting Security Vulnerabilities
 
-The security of Release Helper is a top priority. If you discover a security vulnerability, we appreciate your help in disclosing it to us responsibly.
+The security of AI Code Reviewer is a top priority. If you discover a security vulnerability, we appreciate your help in disclosing it to us responsibly.
 
 ### ⚠️ Please Do NOT:
 - Open a public GitHub issue
@@ -14,7 +14,7 @@ The security of Release Helper is a top priority. If you discover a security vul
 **1. Report Privately**
 
 Contact us directly at:
-- **GitHub Security Advisories**: [Report a vulnerability](https://github.com/zxcnoname666/release-helper/security/advisories/new) (preferred)
+- **GitHub Security Advisories**: [Report a vulnerability](https://github.com/zxcnoname666/AI-Code-Reviewer/security/advisories/new) (preferred)
 
 **2. Include Details**
 
@@ -228,7 +228,7 @@ We assess vulnerabilities using CVSS v3.1:
 ### In Scope
 
 Security issues in:
-- Release Helper source code (`src/`)
+- AI Code Reviewer source code (`src/`)
 - GitHub Actions workflow execution
 - API key handling and secret management
 - Dependencies and supply chain
@@ -244,7 +244,7 @@ Security issues in:
 
 ## 🏅 Hall of Fame
 
-We recognize security researchers who help improve Release Helper's security:
+We recognize security researchers who help improve AI Code Reviewer's security:
 
 *(No vulnerabilities reported yet)*
 
@@ -255,9 +255,9 @@ We recognize security researchers who help improve Release Helper's security:
 **Security Team:**
 - GitHub: [@zxcnoname666](https://github.com/zxcnoname666)
 
-**For general questions:** Open a [Discussion](https://github.com/zxcnoname666/release-helper/discussions)
+**For general questions:** Open a [Discussion](https://github.com/zxcnoname666/AI-Code-Reviewer/discussions)
 
-**For bugs (non-security):** Open an [Issue](https://github.com/zxcnoname666/release-helper/issues)
+**For bugs (non-security):** Open an [Issue](https://github.com/zxcnoname666/AI-Code-Reviewer/issues)
 
 ## 📜 Disclosure Policy
 
@@ -282,6 +282,6 @@ This security policy may be updated periodically. Check this page for the latest
 
 ## 🙏 Thank You
 
-Thank you for helping keep Release Helper and its users safe! Your responsible disclosure helps protect the entire community.
+Thank you for helping keep AI Code Reviewer and its users safe! Your responsible disclosure helps protect the entire community.
 
-If you have suggestions for improving this security policy, please open a [Discussion](https://github.com/zxcnoname666/release-helper/discussions).
+If you have suggestions for improving this security policy, please open a [Discussion](https://github.com/zxcnoname666/AI-Code-Reviewer/discussions).

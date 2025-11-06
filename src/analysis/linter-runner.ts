@@ -5,8 +5,8 @@
 
 import type { LintResult } from '../types/index.js';
 import { exec } from '@actions/exec';
-import { existsSync, readdirSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { existsSync, readdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 /**
  * Custom linter configuration
