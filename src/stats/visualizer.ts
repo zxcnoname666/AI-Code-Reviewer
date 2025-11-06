@@ -3,6 +3,7 @@
  */
 
 import type { ReviewStatistics, ReviewIssue } from '../types/index.js';
+import Table from 'cli-table3';
 
 /**
  * Generate beautiful statistics report
@@ -26,46 +27,54 @@ export function generateStatisticsReport(stats: ReviewStatistics, issues: Review
  * Generate header with logo
  */
 function generateHeader(): string {
-  return `
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃                                                                     ┃
-┃    🤖  𝗔𝗜 𝗖𝗢𝗗𝗘 𝗥𝗘𝗩𝗜𝗘𝗪 - 𝗔𝗡𝗔𝗟𝗬𝗦𝗜𝗦 𝗖𝗢𝗠𝗣𝗟𝗘𝗧𝗘  🤖          ┃
-┃                                                                     ┃
-┃         ⚡ Powered by Advanced AI & Deep Code Analysis ⚡          ┃
-┃                                                                     ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-`;
+  const table = new Table({
+    chars: {
+      'top': '━', 'top-mid': '━', 'top-left': '┏', 'top-right': '┓',
+      'bottom': '━', 'bottom-mid': '━', 'bottom-left': '┗', 'bottom-right': '┛',
+      'left': '┃', 'left-mid': '┃', 'mid': '━', 'mid-mid': '━',
+      'right': '┃', 'right-mid': '┃', 'middle': '┃'
+    },
+    style: { 'padding-left': 0, 'padding-right': 0 },
+    colWidths: [69]
+  });
+
+  table.push(
+    [''],
+    ['    🤖  𝗔𝗜 𝗖𝗢𝗗𝗘 𝗥𝗘𝗩𝗜𝗘𝗪 - 𝗔𝗡𝗔𝗟𝗬𝗦𝗜𝗦 𝗖𝗢𝗠𝗣𝗟𝗘𝗧𝗘  🤖'],
+    [''],
+    ['         ⚡ Powered by Advanced AI & Deep Code Analysis ⚡'],
+    ['']
+  );
+
+  return '```\n' + table.toString() + '\n```';
 }
 
 /**
  * Generate overview section
  */
 function generateOverviewSection(stats: ReviewStatistics): string {
-  const lines: string[] = [];
+  const table = new Table({
+    head: [],
+    colWidths: [22, 42],
+    style: { head: [], border: [] }
+  });
 
-  lines.push('## 📊 Review Overview\n');
-  lines.push('```');
-  lines.push('┌─────────────────────────────────────────────────────────────┐');
-  lines.push(`│  Files Reviewed      │ ${padRight(stats.totalFiles.toString(), 40)} │`);
-  lines.push(`│  Total Lines Changed │ ${padRight(stats.totalLines.toString(), 40)} │`);
-  lines.push(`│  Lines Added         │ ${padRight(`+${stats.additions}`, 40)} │`);
-  lines.push(`│  Lines Deleted       │ ${padRight(`-${stats.deletions}`, 40)} │`);
-  lines.push(`│  Review Time         │ ${padRight(formatDuration(stats.reviewTime), 40)} │`);
-  lines.push(`│  Tokens Used         │ ${padRight(stats.tokensUsed.toLocaleString(), 40)} │`);
-  lines.push('└─────────────────────────────────────────────────────────────┘');
-  lines.push('```');
+  table.push(
+    ['Files Reviewed', stats.totalFiles.toString()],
+    ['Total Lines Changed', stats.totalLines.toString()],
+    ['Lines Added', `+${stats.additions}`],
+    ['Lines Deleted', `-${stats.deletions}`],
+    ['Review Time', formatDuration(stats.reviewTime)],
+    ['Tokens Used', stats.tokensUsed.toLocaleString()]
+  );
 
-  return lines.join('\n');
+  return '## 📊 Review Overview\n\n```\n' + table.toString() + '\n```';
 }
 
 /**
  * Generate issues chart with sparkline
  */
 function generateIssuesChart(stats: ReviewStatistics): string {
-  const lines: string[] = [];
-
-  lines.push('## 🎯 Issues Found\n');
-
   const maxIssues = Math.max(
     stats.criticalIssues,
     stats.warningIssues,
@@ -83,16 +92,39 @@ function generateIssuesChart(stats: ReviewStatistics): string {
   const warningPct = total > 0 ? Math.round((stats.warningIssues / total) * 100) : 0;
   const infoPct = total > 0 ? Math.round((stats.infoIssues / total) * 100) : 0;
 
-  lines.push('```');
-  lines.push('┌─────────────────────────────────────────────────────────┐');
-  lines.push(`│ 🔴 Critical   ${criticalBar}  ${String(stats.criticalIssues).padStart(3)} (${String(criticalPct).padStart(2)}%) │`);
-  lines.push(`│ ⚠️  Warnings   ${warningBar}  ${String(stats.warningIssues).padStart(3)} (${String(warningPct).padStart(2)}%) │`);
-  lines.push(`│ 📘 Info       ${infoBar}  ${String(stats.infoIssues).padStart(3)} (${String(infoPct).padStart(2)}%) │`);
-  lines.push('├─────────────────────────────────────────────────────────┤');
-  lines.push(`│ Total Issues: ${stats.issuesFound.toString().padEnd(42)} │`);
-  lines.push(`│ Files Affected: ${stats.filesWithIssues}/${stats.totalFiles}${' '.repeat(38 - (stats.filesWithIssues.toString() + stats.totalFiles.toString()).length)} │`);
-  lines.push('└─────────────────────────────────────────────────────────┘');
-  lines.push('```');
+  const table = new Table({
+    head: [],
+    colWidths: [59],
+    style: { head: [], border: [] }
+  });
+
+  table.push(
+    [`🔴 Critical   ${criticalBar}  ${String(stats.criticalIssues).padStart(3)} (${String(criticalPct).padStart(2)}%)`],
+    [`⚠️  Warnings   ${warningBar}  ${String(stats.warningIssues).padStart(3)} (${String(warningPct).padStart(2)}%)`],
+    [`📘 Info       ${infoBar}  ${String(stats.infoIssues).padStart(3)} (${String(infoPct).padStart(2)}%)`]
+  );
+
+  const divider = new Table({
+    head: [],
+    colWidths: [59],
+    style: { head: [], border: [] },
+    chars: { 'top': '─', 'top-mid': '┼', 'top-left': '├', 'top-right': '┤' }
+  });
+
+  const summaryTable = new Table({
+    head: [],
+    colWidths: [59],
+    style: { head: [], border: [] }
+  });
+
+  summaryTable.push(
+    [`Total Issues: ${stats.issuesFound}`],
+    [`Files Affected: ${stats.filesWithIssues}/${stats.totalFiles}`]
+  );
+
+  let result = '## 🎯 Issues Found\n\n```\n' + table.toString() + '\n';
+  result += divider.toString().split('\n')[0] + '\n';
+  result += summaryTable.toString() + '\n```';
 
   // Add sparkline visualization
   if (stats.issuesFound > 0) {
@@ -101,11 +133,10 @@ function generateIssuesChart(stats: ReviewStatistics): string {
       stats.warningIssues,
       stats.infoIssues,
     ]);
-    lines.push('');
-    lines.push(`**Trend**: ${sparkline} (Critical → Warning → Info)`);
+    result += '\n\n**Trend**: ' + sparkline + ' (Critical → Warning → Info)';
   }
 
-  return lines.join('\n');
+  return result;
 }
 
 /**
@@ -169,10 +200,6 @@ function generateLanguageDistribution(stats: ReviewStatistics): string {
  * Generate complexity gauge
  */
 function generateComplexityGauge(complexity: number): string {
-  const lines: string[] = [];
-
-  lines.push('## 🎚️ Average Complexity\n');
-
   // Complexity levels
   let level: string;
   let icon: string;
@@ -191,24 +218,25 @@ function generateComplexityGauge(complexity: number): string {
     icon = '🔴';
   }
 
-  lines.push('```');
-  lines.push('┌─────────────────────────────────────────┐');
-  lines.push('│  Complexity Gauge                       │');
-  lines.push('├─────────────────────────────────────────┤');
-  lines.push('│                                         │');
-  lines.push(`│      ${icon} ${padRight(level, 15)} ${padRight(complexity.toFixed(1), 10)}  │`);
-  lines.push('│                                         │');
+  const table = new Table({
+    head: ['Complexity Gauge'],
+    colWidths: [43],
+    style: { head: ['cyan'], border: [] }
+  });
 
   // Draw gauge
   const gaugePos = Math.min(Math.floor((complexity / 30) * 35), 35);
-  const gauge = '│  ' + '░'.repeat(gaugePos) + '█' + '░'.repeat(35 - gaugePos) + '  │';
-  lines.push(gauge);
+  const gauge = '░'.repeat(gaugePos) + '█' + '░'.repeat(35 - gaugePos);
 
-  lines.push('│  0                                  30+ │');
-  lines.push('└─────────────────────────────────────────┘');
-  lines.push('```');
+  table.push(
+    [''],
+    [`      ${icon} ${level.padEnd(15)} ${complexity.toFixed(1).padEnd(10)}`],
+    [''],
+    [`  ${gauge}`],
+    ['  0' + ' '.repeat(34) + '30+']
+  );
 
-  return lines.join('\n');
+  return '## 🎚️ Average Complexity\n\n```\n' + table.toString() + '\n```';
 }
 
 /**
@@ -393,20 +421,31 @@ export function generateSummaryBadge(stats: ReviewStatistics): string {
   const qualityScore = Math.max(0, 100 - (stats.criticalIssues * 20) - (stats.warningIssues * 5) - (stats.infoIssues * 1));
   const scoreBar = generateProgressBar(qualityScore, 100, 25);
 
-  return `
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃                                                       ┃
-┃  ${statusIcon}  ${status.padEnd(46)} ┃
-┃                                                       ┃
-┃  📊 Quality Score: ${scoreBar}   ┃
-┃                                                       ┃
-┃  Issues Found:                                        ┃
-┃    • Critical: ${String(stats.criticalIssues).padStart(3)} 🔴${' '.repeat(35)} ┃
-┃    • Warnings:  ${String(stats.warningIssues).padStart(3)} ⚠️${' '.repeat(35)} ┃
-┃    • Info:      ${String(stats.infoIssues).padStart(3)} 📘${' '.repeat(35)} ┃
-┃                                                       ┃
-┃  Files: ${stats.filesWithIssues}/${stats.totalFiles} affected${' '.repeat(36 - (stats.filesWithIssues.toString() + stats.totalFiles.toString()).length)} ┃
-┃                                                       ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-`;
+  const table = new Table({
+    chars: {
+      'top': '━', 'top-mid': '━', 'top-left': '┏', 'top-right': '┓',
+      'bottom': '━', 'bottom-mid': '━', 'bottom-left': '┗', 'bottom-right': '┛',
+      'left': '┃', 'left-mid': '┃', 'mid': '━', 'mid-mid': '━',
+      'right': '┃', 'right-mid': '┃', 'middle': '┃'
+    },
+    style: { 'padding-left': 0, 'padding-right': 0 },
+    colWidths: [53]
+  });
+
+  table.push(
+    [''],
+    [`  ${statusIcon}  ${status}`],
+    [''],
+    [`  📊 Quality Score: ${scoreBar}`],
+    [''],
+    ['  Issues Found:'],
+    [`    • Critical: ${String(stats.criticalIssues).padStart(3)} 🔴`],
+    [`    • Warnings:  ${String(stats.warningIssues).padStart(3)} ⚠️`],
+    [`    • Info:      ${String(stats.infoIssues).padStart(3)} 📘`],
+    [''],
+    [`  Files: ${stats.filesWithIssues}/${stats.totalFiles} affected`],
+    ['']
+  );
+
+  return '```\n' + table.toString() + '\n```';
 }
