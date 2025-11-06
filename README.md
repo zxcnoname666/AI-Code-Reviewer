@@ -161,7 +161,7 @@ jobs:
 | Input | Description | Default |
 |-------|-------------|---------|
 | `OPENAI_API_KEY` | OpenAI API key (or compatible provider) | - |
-| `OPENAI_API_MODEL` | Model name (`gpt-5`, `gpt-5-turbo`, `o3`, `o3-mini`, etc.) | `gpt-5` |
+| `OPENAI_API_MODEL` | Model name (`gpt-5`, `gpt-5-high`, `o3`, `o3-mini`, etc.) | `gpt-5` |
 | `OPENAI_API_BASE_URL` | Custom endpoint (Azure, AWS Bedrock, local) | `https://api.openai.com/v1` |
 | `REVIEW_LANGUAGE` | Review language (`en`, `ru`, `es`, `fr`, `de`, etc.) | `en` |
 | `SILENT_MODE` | Minimize email notifications | `false` |
