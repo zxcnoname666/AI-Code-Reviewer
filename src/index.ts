@@ -53,10 +53,22 @@ async function run(): Promise<void> {
     const { owner, repo } = context.repo;
 
     // Get PR number from context
-    const pullNumber = context.payload.pull_request?.number;
+    // Support both pull_request events and issue_comment events (from /review command)
+    let pullNumber: number | undefined;
+
+    if (context.eventName === 'pull_request') {
+      pullNumber = context.payload.pull_request?.number;
+    } else if (context.eventName === 'issue_comment') {
+      // Check if this is a PR comment (not regular issue)
+      if (context.payload.issue?.pull_request) {
+        pullNumber = context.payload.issue.number;
+      }
+    }
 
     if (!pullNumber) {
-      throw new Error('This action must be triggered by a pull_request event');
+      throw new Error(
+        'This action must be triggered by a pull_request event or a /review comment on a pull request'
+      );
     }
 
     info(`Repository: ${owner}/${repo}`);
