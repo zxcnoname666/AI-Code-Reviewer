@@ -18,18 +18,22 @@ export async function parseFile(
   metrics: CodeMetrics;
 }> {
   const language = detectLanguage(filename);
+  console.log(`[parseFile] Detected language: ${language} for ${filename}`);
 
   try {
     switch (language) {
       case 'typescript':
       case 'tsx':
+        console.log(`[parseFile] Using TypeScript parser for ${filename}`);
         return parseTypeScript(content, language === 'tsx');
 
       case 'javascript':
       case 'jsx':
+        console.log(`[parseFile] Using JavaScript parser for ${filename}`);
         return parseJavaScript(content, language === 'jsx');
 
       default:
+        console.log(`[parseFile] No parser for language '${language}' - returning basic metrics`);
         return {
           ast: null,
           functions: [],
@@ -38,7 +42,9 @@ export async function parseFile(
         };
     }
   } catch (error) {
-    console.warn(`Failed to parse ${filename}:`, error);
+    console.error(`[parseFile] ❌ Failed to parse ${filename}:`, error);
+    console.error(`[parseFile] Error type: ${error instanceof Error ? error.name : typeof error}`);
+    console.error(`[parseFile] Error message: ${error instanceof Error ? error.message : String(error)}`);
     return {
       ast: null,
       functions: [],
@@ -88,6 +94,7 @@ function parseTypeScript(
   metrics: CodeMetrics;
 } {
   try {
+    console.log(`[parseTypeScript] Parsing with Babel (TSX: ${isTSX})`);
     // Use Babel parser for TypeScript - it has better support
     const ast = babelParse(content, {
       sourceType: 'module',
@@ -105,8 +112,11 @@ function parseTypeScript(
       ].filter(Boolean) as any[],
     });
 
+    console.log(`[parseTypeScript] AST parsed successfully`);
     const functions = extractFunctions(ast as any);
+    console.log(`[parseTypeScript] Extracted ${functions.length} functions`);
     const dependencies = extractDependencies(ast as any);
+    console.log(`[parseTypeScript] Extracted ${dependencies.length} dependencies`);
     const metrics = calculateMetrics(content, functions);
 
     return {
@@ -116,6 +126,7 @@ function parseTypeScript(
       metrics,
     };
   } catch (error) {
+    console.error(`[parseTypeScript] ❌ Babel parsing failed:`, error);
     throw new Error(`TypeScript parsing failed: ${error}`);
   }
 }
@@ -133,6 +144,7 @@ function parseJavaScript(
   metrics: CodeMetrics;
 } {
   try {
+    console.log(`[parseJavaScript] Parsing with Babel (JSX: ${isJSX})`);
     const ast = babelParse(content, {
       sourceType: 'module',
       plugins: [
@@ -149,8 +161,11 @@ function parseJavaScript(
       ],
     });
 
+    console.log(`[parseJavaScript] AST parsed successfully`);
     const functions = extractFunctions(ast as any);
+    console.log(`[parseJavaScript] Extracted ${functions.length} functions`);
     const dependencies = extractDependencies(ast as any);
+    console.log(`[parseJavaScript] Extracted ${dependencies.length} dependencies`);
     const metrics = calculateMetrics(content, functions);
 
     return {

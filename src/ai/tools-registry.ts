@@ -378,15 +378,25 @@ async function analyzeFileAST(path: string, context: ToolContext): Promise<strin
   const fullPath = join(context.workdir, path);
   const content = readFileSync(fullPath, 'utf-8');
 
+  console.log(`[analyze_file_ast] Parsing ${path}...`);
   const analysis = await parseFile(content, path);
+
+  console.log(`[analyze_file_ast] Parse result for ${path}:`);
+  console.log(`  - AST available: ${analysis.ast !== null}`);
+  console.log(`  - Functions found: ${analysis.functions.length}`);
+  console.log(`  - Dependencies found: ${analysis.dependencies.length}`);
+  console.log(`  - Lines of code: ${analysis.metrics.linesOfCode}`);
 
   const lines: string[] = [];
   lines.push(`## AST Analysis: ${path}\n`);
 
   // Check if parsing failed
   if (analysis.ast === null) {
+    console.log(`[analyze_file_ast] ⚠️ AST parsing failed for ${path} - returning basic metrics only`);
     lines.push(`⚠️ **Note**: Full AST parsing not available for this file.`);
     lines.push(`Showing basic metrics only.\n`);
+  } else {
+    console.log(`[analyze_file_ast] ✓ AST parsing successful for ${path}`);
   }
 
   lines.push(`### Metrics`);
@@ -398,6 +408,7 @@ async function analyzeFileAST(path: string, context: ToolContext): Promise<strin
   lines.push(`- Comment ratio: ${(analysis.metrics.commentRatio * 100).toFixed(1)}%\n`);
 
   if (analysis.functions.length > 0) {
+    console.log(`[analyze_file_ast] Listing ${analysis.functions.length} functions`);
     lines.push(`### Functions (${analysis.functions.length})`);
     for (const func of analysis.functions) {
       lines.push(`- **${func.name}** (line ${func.line})`);
@@ -411,13 +422,17 @@ async function analyzeFileAST(path: string, context: ToolContext): Promise<strin
     }
     lines.push('');
   } else if (analysis.ast === null) {
+    console.log(`[analyze_file_ast] No functions extracted due to parsing failure`);
     lines.push(`\n### Functions`);
     lines.push(`Could not extract function details - AST parsing failed for this file.`);
     lines.push(`The file appears to be valid code based on basic metrics (${analysis.metrics.linesOfCode} lines).`);
     lines.push(`**Recommendation**: Use read_file() or get_file_diff() to review the code manually.\n`);
+  } else {
+    console.log(`[analyze_file_ast] No functions found in ${path}`);
   }
 
   if (analysis.dependencies.length > 0) {
+    console.log(`[analyze_file_ast] Found ${analysis.dependencies.length} dependencies`);
     lines.push(`### Dependencies (${analysis.dependencies.length})`);
     for (const dep of analysis.dependencies) {
       const type = dep.isExternal ? '📦 external' : '📁 local';
@@ -428,7 +443,9 @@ async function analyzeFileAST(path: string, context: ToolContext): Promise<strin
     }
   }
 
-  return lines.join('\n');
+  const result = lines.join('\n');
+  console.log(`[analyze_file_ast] Returning ${result.length} chars for ${path}`);
+  return result;
 }
 
 async function findFunctionCallers(funcName: string, filePath: string, context: ToolContext): Promise<string> {
