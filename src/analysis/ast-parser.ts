@@ -453,7 +453,7 @@ function getCalleeName(callee: any): string {
   return '';
 }
 
-function isExported(node: any, parent: any): boolean {
+function isExported(_node: any, parent: any): boolean {
   if (!parent) return false;
   return (
     parent.type === 'ExportNamedDeclaration' ||

@@ -245,7 +245,6 @@ export function visualizeCallGraph(
   graph: Map<string, CallGraphNode>,
   maxDepth: number = 2
 ): string {
-  const key = `${file}:${funcName}`;
   const lines: string[] = [];
 
   lines.push(`Call Graph for ${funcName} (${file})`);

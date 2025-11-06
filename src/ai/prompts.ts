@@ -100,12 +100,13 @@ For EACH changed file, you MUST:
 
 When functions are modified or added:
 
-1. **Who Uses It**: \`find_function_callers\` → Identify all call sites (breaking change risk!)
-2. **What It Uses**: \`find_function_dependencies\` → Check dependencies and potential issues
-3. **Complexity Check**: \`analyze_function_complexity\` → Flag overly complex functions
-4. **Pattern Search**: \`search_code\` → Find similar patterns that might need updates
+1. **Full Impact Analysis**: \`analyze_function_impact\` → **ESSENTIAL for breaking changes!** Shows full context around ALL call sites, not just grep lines. Perfect for reviewing parameter changes, refactoring, and detecting breaking changes.
+2. **Quick Caller List**: \`find_function_callers\` → Fast list of all call sites (use when you just need counts)
+3. **What It Uses**: \`find_function_dependencies\` → Check dependencies and potential issues
+4. **Complexity Check**: \`analyze_function_complexity\` → Flag overly complex functions
+5. **Pattern Search**: \`search_code\` → Find similar patterns that might need updates
 
-**Critical**: Always check function callers before approving API changes!
+**Critical**: Always use \`analyze_function_impact\` when reviewing function signature changes! It shows actual usage context to detect breaking changes.
 
 ### Phase 4: Security & Architecture Deep Dive
 
@@ -435,7 +436,8 @@ If file is complex or unfamiliar:
 #### Step 3: Impact Analysis (For modified/new functions)
 
 For each significant function change:
-- find_function_callers(name, file)    [Breaking change risk!]
+- analyze_function_impact(name, file)  [**MUST USE for breaking changes!** Full context]
+- find_function_callers(name, file)    [Quick list of call sites]
 - find_function_dependencies(name, file) [What it depends on]
 - analyze_function_complexity(name, file) [Complexity check]
 - search_code(pattern)                 [Find similar patterns]
@@ -445,6 +447,8 @@ For each significant function change:
 - Database query changes
 - Authentication/authorization changes
 - Core business logic changes
+
+**Important**: Use \`analyze_function_impact\` instead of \`find_function_callers\` when you need to see HOW a function is called, not just WHERE. It shows full code context around each call site.
 
 #### Step 4: Commit-Level Analysis (For complex PRs)
 
@@ -525,8 +529,8 @@ Begin your analysis by using tools to investigate the changes. Make multiple too
 export function parseToolCalls(response: string): Array<{ name: string; arguments: Record<string, any> }> {
   const toolCalls: Array<{ name: string; arguments: Record<string, any> }> = [];
 
-  // Look for JSON blocks with tool calls
-  const jsonMatches = response.matchAll(/```json\s*([\s\S]*?)\s*```/g);
+  // Look for JSON or JSON5 blocks with tool calls
+  const jsonMatches = response.matchAll(/```json5?\s*([\s\S]*?)\s*```/g);
 
   for (const match of jsonMatches) {
     try {
@@ -584,9 +588,9 @@ ${params}
 
 ## How to Use Tools
 
-To use a tool, respond with a JSON code block:
+To use a tool, respond with a JSON5 code block:
 
-\`\`\`json
+\`\`\`json5
 {
   "name": "tool_name",
   "arguments": {
@@ -598,12 +602,14 @@ To use a tool, respond with a JSON code block:
 
 Or multiple tools at once:
 
-\`\`\`json
+\`\`\`json5
 [
   { "name": "tool1", "arguments": { ... } },
   { "name": "tool2", "arguments": { ... } }
 ]
 \`\`\`
+
+**Important**: Use \`\`\`json5 syntax highlighting (not \`\`\`json) for better readability.
 
 I will execute the tools and provide results. You can then make additional tool calls or generate your final review.`;
 }

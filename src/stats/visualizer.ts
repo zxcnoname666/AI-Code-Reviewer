@@ -175,24 +175,19 @@ function generateComplexityGauge(complexity: number): string {
 
   // Complexity levels
   let level: string;
-  let color: string;
   let icon: string;
 
   if (complexity <= 5) {
     level = 'LOW';
-    color = 'GREEN';
     icon = '✅';
   } else if (complexity <= 10) {
     level = 'MODERATE';
-    color = 'YELLOW';
     icon = '⚠️';
   } else if (complexity <= 20) {
     level = 'HIGH';
-    color = 'ORANGE';
     icon = '🟠';
   } else {
     level = 'VERY HIGH';
-    color = 'RED';
     icon = '🔴';
   }
 

@@ -5,7 +5,7 @@
 
 import { getInput, setFailed, info, warning, startGroup, endGroup } from '@actions/core';
 import { context, getOctokit } from '@actions/github';
-import type { ReviewConfig, ReviewStatistics, ReviewIssue } from './types/index.js';
+import type { ReviewConfig, ReviewStatistics } from './types/index.js';
 import { getPullRequestInfo, getChangedFiles, postReviewComment, postSilentComment, getReviewEvent, addLabels, removeLabel } from './github/client.js';
 import { performAIReview, parseReviewSummary } from './ai/client.js';
 import { createChunks, getChunkingStats } from './chunking/strategy.js';
@@ -154,7 +154,7 @@ async function run(): Promise<void> {
       for (let i = 0; i < chunks.length; i++) {
         const chunk = chunks[i];
         info(`\n📦 Chunk ${i + 1}/${chunks.length}: ${chunk.id}`);
-        info(`Files: ${chunk.files.map(f => f.filename).join(', ')}`);
+        info(`Files:\n\`\`\`\n${chunk.files.map(f => f.filename).join('\n')}\n\`\`\``);
 
         const chunkReview = await performAIReview(
           { ...prInfo, filesChanged: chunk.files.length },

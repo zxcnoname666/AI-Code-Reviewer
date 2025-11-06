@@ -8,7 +8,6 @@ import { join } from 'node:path';
 import { exec } from '@actions/exec';
 import { parseFile } from '../analysis/ast-parser.js';
 import { lintFile } from '../analysis/linter-runner.js';
-import { buildCallGraph, visualizeCallGraph, getImpactAnalysis } from '../analysis/call-graph.js';
 
 /**
  * Tool execution context
@@ -251,6 +250,28 @@ export const AI_TOOLS: AITool[] = [
       required: [],
     },
   },
+  {
+    name: 'analyze_function_impact',
+    description: 'Comprehensive analysis of function call sites across the entire project. Shows full context around each call (not just grep lines) to analyze breaking changes when function signatures change. Essential for reviewing parameter changes, refactoring, and API modifications.',
+    parameters: {
+      type: 'object',
+      properties: {
+        function_name: {
+          type: 'string',
+          description: 'Name of the function to analyze',
+        },
+        file_path: {
+          type: 'string',
+          description: 'Path to the file containing the function definition',
+        },
+        context_lines: {
+          type: 'number',
+          description: 'Number of lines to show before and after each call (default: 5)',
+        },
+      },
+      required: ['function_name', 'file_path'],
+    },
+  },
 ];
 
 /**
@@ -323,6 +344,9 @@ async function executeToolInternal(tool: ToolCall, context: ToolContext): Promis
 
     case 'get_pr_context':
       return await getPRContext(context);
+
+    case 'analyze_function_impact':
+      return await analyzeFunctionImpact(args.function_name, args.file_path, args.context_lines || 5, context);
 
     default:
       throw new Error(`Unknown tool: ${name}`);
@@ -448,7 +472,7 @@ async function analyzeFileAST(path: string, context: ToolContext): Promise<strin
   return result;
 }
 
-async function findFunctionCallers(funcName: string, filePath: string, context: ToolContext): Promise<string> {
+async function findFunctionCallers(funcName: string, _filePath: string, context: ToolContext): Promise<string> {
   // For now, use grep to find callers
   // TODO: Integrate with call graph when analyzing all files
   let output = '';
@@ -861,4 +885,196 @@ async function getPRContext(context: ToolContext): Promise<string> {
   }
 
   return lines.join('\n');
+}
+
+/**
+ * Comprehensive function impact analysis
+ * Shows full context around each call site for breaking change detection
+ */
+async function analyzeFunctionImpact(
+  funcName: string,
+  filePath: string,
+  contextLines: number,
+  context: ToolContext
+): Promise<string> {
+  const lines: string[] = [];
+
+  lines.push(`## Function Impact Analysis: ${funcName}`);
+  lines.push(`**Definition**: \`${filePath}\``);
+  lines.push(`**Context**: ±${contextLines} lines around each call\n`);
+
+  // First, get the function definition for reference
+  try {
+    const fullPath = join(context.workdir, filePath);
+    const content = readFileSync(fullPath, 'utf-8');
+    const analysis = await parseFile(content, filePath);
+    const func = analysis.functions.find(f => f.name === funcName);
+
+    if (func) {
+      lines.push(`### Function Definition\n`);
+      lines.push(`**Line**: ${func.line}`);
+      lines.push(`**Parameters**: ${func.params.length > 0 ? func.params.join(', ') : '(none)'}`);
+      lines.push(`**Async**: ${func.isAsync ? 'Yes' : 'No'}`);
+      lines.push(`**Exported**: ${func.isExported ? 'Yes' : 'No'}`);
+      lines.push(`**Complexity**: ${func.complexity || 'N/A'}\n`);
+    }
+  } catch (error) {
+    lines.push(`⚠️ Could not parse function definition: ${error}\n`);
+  }
+
+  // Find all call sites using git grep
+  let grepOutput = '';
+  try {
+    await exec(
+      'git',
+      ['grep', '-F', '-n', `${funcName}(`, context.headSha],
+      {
+        cwd: context.workdir,
+        ignoreReturnCode: true,
+        listeners: {
+          stdout: (data: Buffer) => {
+            grepOutput += data.toString();
+          },
+        },
+      }
+    );
+  } catch (error) {
+    return `❌ Failed to search for function calls: ${error}`;
+  }
+
+  if (!grepOutput.trim()) {
+    lines.push(`### Call Sites\n`);
+    lines.push(`✅ No call sites found (function may be unused or only called dynamically)\n`);
+    return lines.join('\n');
+  }
+
+  // Parse grep results
+  interface CallSite {
+    file: string;
+    line: number;
+    snippet: string;
+  }
+
+  const callSites: CallSite[] = [];
+  const grepLines = grepOutput.trim().split('\n');
+
+  for (const grepLine of grepLines) {
+    // Format: file:line:content
+    const match = grepLine.match(/^([^:]+):(\d+):(.+)$/);
+    if (match) {
+      const [, file, lineStr, snippet] = match;
+      callSites.push({
+        file,
+        line: parseInt(lineStr, 10),
+        snippet: snippet.trim(),
+      });
+    }
+  }
+
+  lines.push(`### Call Sites\n`);
+  lines.push(`Found **${callSites.length}** call site(s) across **${new Set(callSites.map(c => c.file)).size}** file(s)\n`);
+
+  // Group by file
+  const byFile = new Map<string, CallSite[]>();
+  for (const site of callSites) {
+    if (!byFile.has(site.file)) {
+      byFile.set(site.file, []);
+    }
+    byFile.get(site.file)!.push(site);
+  }
+
+  // Show detailed context for each call site (limit to 15 total to avoid overwhelming)
+  let shownCount = 0;
+  const maxToShow = 15;
+
+  for (const [file, sites] of byFile.entries()) {
+    if (shownCount >= maxToShow) {
+      const remaining = callSites.length - shownCount;
+      lines.push(`\n... and **${remaining}** more call site(s) in other files`);
+      lines.push(`💡 **Tip**: Use \`search_code\` or \`find_function_callers\` for a complete list`);
+      break;
+    }
+
+    lines.push(`---\n`);
+    lines.push(`#### \`${file}\` (${sites.length} call${sites.length > 1 ? 's' : ''})\n`);
+
+    // Read the file to show context
+    try {
+      const fullPath = join(context.workdir, file);
+      const fileContent = readFileSync(fullPath, 'utf-8');
+      const fileLines = fileContent.split('\n');
+
+      for (const site of sites) {
+        if (shownCount >= maxToShow) break;
+
+        const lineNum = site.line;
+        const startLine = Math.max(1, lineNum - contextLines);
+        const endLine = Math.min(fileLines.length, lineNum + contextLines);
+
+        lines.push(`**Call at line ${lineNum}**:\n`);
+        lines.push('```' + detectLanguageExtension(file));
+
+        // Show context with line numbers
+        for (let i = startLine; i <= endLine; i++) {
+          const marker = i === lineNum ? '→' : ' ';
+          const lineContent = fileLines[i - 1] || '';
+          lines.push(`${marker} ${String(i).padStart(4, ' ')} | ${lineContent}`);
+        }
+
+        lines.push('```\n');
+        shownCount++;
+      }
+    } catch (error) {
+      lines.push(`⚠️ Could not read file context: ${error}\n`);
+      shownCount += sites.length;
+    }
+  }
+
+  // Add analysis summary
+  lines.push(`---\n`);
+  lines.push(`### Breaking Change Analysis\n`);
+  lines.push(`**Total Impact**: ${callSites.length} call site(s) would be affected by changes to this function\n`);
+  lines.push(`**Recommendations**:`);
+  lines.push(`- Review all call sites before changing function signature`);
+  lines.push(`- Check if parameter types/order match your changes`);
+  lines.push(`- Consider adding/updating TypeScript types to catch issues at compile time`);
+  lines.push(`- Add deprecation warnings if this is a public API`);
+
+  if (callSites.length > 10) {
+    lines.push(`- ⚠️ **High impact**: ${callSites.length} call sites - consider backward compatibility`);
+  } else if (callSites.length > 5) {
+    lines.push(`- ⚠️ **Medium impact**: ${callSites.length} call sites - thorough testing recommended`);
+  } else if (callSites.length > 0) {
+    lines.push(`- ✅ **Low impact**: ${callSites.length} call sites - manageable refactoring`);
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * Detect language from file extension for syntax highlighting
+ */
+function detectLanguageExtension(filename: string): string {
+  const ext = filename.split('.').pop()?.toLowerCase() || '';
+
+  const langMap: Record<string, string> = {
+    'ts': 'typescript',
+    'tsx': 'tsx',
+    'js': 'javascript',
+    'jsx': 'jsx',
+    'py': 'python',
+    'rs': 'rust',
+    'go': 'go',
+    'java': 'java',
+    'cpp': 'cpp',
+    'c': 'c',
+    'cs': 'csharp',
+    'rb': 'ruby',
+    'php': 'php',
+    'swift': 'swift',
+    'kt': 'kotlin',
+    'scala': 'scala',
+  };
+
+  return langMap[ext] || '';
 }

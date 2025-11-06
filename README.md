@@ -195,7 +195,8 @@ The AI actively investigates code using specialized tools:
 - `read_large_diff_chunk` - Handle massive files in manageable chunks
 
 **Code Understanding:**
-- `find_function_callers` - Find all places where a function is called
+- `analyze_function_impact` - **🎯 Breaking Change Detector!** Shows full context around ALL function call sites (not just grep lines). Essential for refactoring and parameter changes.
+- `find_function_callers` - Quick list of all places where a function is called
 - `find_function_dependencies` - Find what functions/modules a function depends on
 - `analyze_function_complexity` - Cyclomatic complexity and maintainability metrics
 - `search_code` - Search patterns across entire codebase
@@ -394,6 +395,71 @@ registerCustomLinter('golangci-lint', {
 - **C#**: dotnet format analyzers
 - **Go**: golangci-lint (via custom integration)
 - **Any**: Configure your own!
+
+### 🎯 Breaking Change Detection
+
+**Use Case**: When refactoring a function that's used across multiple files, AI uses the `analyze_function_impact` tool to show full context around ALL call sites.
+
+**Example**: You're changing the signature of `calculatePrice(quantity, price)` to `calculatePrice(options)`:
+
+```typescript
+// Before:
+function calculatePrice(quantity: number, price: number): number {
+  return quantity * price;
+}
+
+// After:
+function calculatePrice(options: { quantity: number; price: number; discount?: number }): number {
+  const { quantity, price, discount = 0 } = options;
+  return quantity * price * (1 - discount);
+}
+```
+
+**What the AI sees with `analyze_function_impact`**:
+
+```markdown
+## Function Impact Analysis: calculatePrice
+
+**Definition**: `src/utils/pricing.ts`
+**Context**: ±5 lines around each call
+
+### Function Definition
+**Line**: 42
+**Parameters**: quantity, price
+**Async**: No
+**Exported**: Yes
+
+### Call Sites
+Found **8** call site(s) across **3** file(s)
+
+---
+
+#### `src/components/Cart.tsx` (3 calls)
+
+**Call at line 67**:
+```tsx
+→   67 | const total = calculatePrice(item.quantity, item.price);
+    68 | setCartTotal(total);
+```
+
+**Call at line 89**:
+```tsx
+    88 | items.forEach(item => {
+→   89 |   subtotal += calculatePrice(item.qty, item.unitPrice);
+    90 | });
+```
+
+### Breaking Change Analysis
+**Total Impact**: 8 call site(s) would be affected by changes to this function
+
+**Recommendations**:
+- ⚠️ **Medium impact**: 8 call sites - thorough testing recommended
+- Review all call sites before changing function signature
+- All callers pass 2 parameters - breaking change confirmed
+- Consider backward compatibility or deprecation period
+```
+
+The AI can now **intelligently warn** that all 8 call sites need updating!
 
 ### Multi-Language Teams
 

@@ -2,7 +2,7 @@
  * AI Client with tool calling support
  */
 
-import type { PullRequestInfo, FileChange, ReviewConfig, ReviewSummary } from '../types/index.js';
+import type { PullRequestInfo, FileChange, ReviewConfig } from '../types/index.js';
 import { info, warning } from '@actions/core';
 import { generateSystemPrompt, generateUserPrompt, parseToolCalls } from './prompts.js';
 import { AI_TOOLS, executeTool, type ToolContext } from './tools-registry.js';
@@ -14,6 +14,31 @@ interface OpenAIConfig {
   apiKey: string;
   model: string;
   baseUrl: string;
+}
+
+/**
+ * OpenAI API response type
+ */
+interface OpenAIResponse {
+  choices: Array<{
+    message: {
+      content?: string;
+      tool_calls?: Array<{
+        function?: {
+          name?: string;
+          arguments?: string | Record<string, any>;
+        };
+        name?: string;
+        arguments?: Record<string, any>;
+      }>;
+      refusal?: string;
+    };
+  }>;
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
 }
 
 /**
@@ -196,7 +221,7 @@ async function callOpenAI(
       throw new Error(`OpenAI API error (${response.status}): ${error}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as OpenAIResponse;
 
     if (!data.choices || !data.choices[0] || !data.choices[0].message) {
       throw new Error('Invalid response format from OpenAI API');
