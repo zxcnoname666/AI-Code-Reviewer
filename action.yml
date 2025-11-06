@@ -20,9 +20,9 @@ inputs:
     required: false
 
   OPENAI_API_MODEL:
-    description: 'OpenAI model to use (gpt-5, gpt-5-high, o3)'
+    description: 'OpenAI model to use (gpt-4o, gpt-4-turbo, o3-mini, etc.)'
     required: false
-    default: 'gpt-5'
+    default: 'gpt-4o'
 
   OPENAI_API_BASE_URL:
     description: 'OpenAI API base URL (for custom endpoints or proxies)'
