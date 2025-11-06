@@ -163,20 +163,39 @@ async function callOpenAI(
     ? config.baseUrl
     : `${config.baseUrl}/chat/completions`;
 
+  // Convert tools to OpenAI tools format
+  const tools = AI_TOOLS.map(tool => ({
+    type: 'function',
+    function: {
+      name: tool.name,
+      description: tool.description,
+      parameters: tool.parameters,
+    },
+  }));
+
   try {
+    const requestBody: any = {
+      model: config.model,
+      messages,
+      temperature: 0.3, // Lower temperature for more focused, consistent reviews
+      max_tokens: MAX_TOKENS,
+      top_p: 0.95,
+    };
+
+    // Add tools if model supports them (most modern models do)
+    // Only skip tools for very old models or specific edge cases
+    if (config.model && !config.model.includes('gpt-3.5-turbo-0301')) {
+      requestBody.tools = tools;
+      requestBody.tool_choice = 'auto'; // Let model decide when to use tools
+    }
+
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${config.apiKey}`,
       },
-      body: JSON.stringify({
-        model: config.model,
-        messages,
-        temperature: 0.3, // Lower temperature for more focused, consistent reviews
-        max_tokens: MAX_TOKENS,
-        top_p: 0.95,
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
@@ -192,6 +211,15 @@ async function callOpenAI(
 
     const message = data.choices[0].message;
     let content = message.content || '';
+
+    // Debug: Log message structure if content is empty but we have tokens
+    if (!content && data.usage && data.usage.completion_tokens > 50) {
+      warning(`Received ${data.usage.completion_tokens} completion tokens but empty content`);
+      warning(`Message keys: ${Object.keys(message).join(', ')}`);
+      if (message.refusal) {
+        warning(`Model refused: ${message.refusal}`);
+      }
+    }
 
     // Handle structured tool calls from API
     // Some models return tool_calls in a separate field instead of in content
