@@ -33,14 +33,14 @@ Before creating a bug report, please check if the issue has already been reporte
 ### Bug: AI changelog generation fails with custom model
 
 **Description:**
-When using `gpt-5-turbo` model, the action fails with error "Invalid model".
+When using `gpt-5-high` model, the action fails with error "Invalid model".
 
 **Steps to reproduce:**
-1. Configure workflow with `OPENAI_API_MODEL: gpt-5-turbo`
+1. Configure workflow with `OPENAI_API_MODEL: gpt-5-high`
 2. Push commit with `!release: patch`
 3. Action fails
 
-**Expected:** Should use gpt-5-turbo model
+**Expected:** Should use gpt-5-high model
 **Actual:** Fails with error
 
 **Environment:**

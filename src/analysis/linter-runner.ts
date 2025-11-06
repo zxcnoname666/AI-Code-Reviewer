@@ -5,7 +5,7 @@
 
 import type { LintResult } from '../types/index.js';
 import { exec } from '@actions/exec';
-import { existsSync } from 'fs';
+import { existsSync, readdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
 /**
@@ -127,6 +127,27 @@ async function runCustomLinter(
 }
 
 /**
+ * Default ESLint configuration for projects without config
+ */
+const DEFAULT_ESLINT_CONFIG = {
+  env: {
+    browser: true,
+    es2021: true,
+    node: true,
+  },
+  extends: ['eslint:recommended'],
+  parserOptions: {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+  },
+  rules: {
+    'no-unused-vars': 'warn',
+    'no-console': 'off',
+    'no-undef': 'error',
+  },
+};
+
+/**
  * Lint JavaScript/TypeScript files
  */
 async function lintJavaScript(filename: string, workdir: string): Promise<LintResult[]> {
@@ -141,12 +162,21 @@ async function lintJavaScript(filename: string, workdir: string): Promise<LintRe
     'eslint.config.js',
   ];
 
-  const hasEslintConfig = eslintConfigFiles.some(config =>
+  let hasEslintConfig = eslintConfigFiles.some(config =>
     existsSync(join(workdir, config))
   );
 
+  // Create default config if none exists
   if (!hasEslintConfig) {
-    return results;
+    try {
+      const defaultConfigPath = join(workdir, '.eslintrc.json');
+      writeFileSync(defaultConfigPath, JSON.stringify(DEFAULT_ESLINT_CONFIG, null, 2));
+      hasEslintConfig = true;
+      console.log(`Created default ESLint config at ${defaultConfigPath}`);
+    } catch (error) {
+      console.warn('Failed to create default ESLint config:', error);
+      return results;
+    }
   }
 
   try {
@@ -302,16 +332,29 @@ async function lintRust(filename: string, workdir: string): Promise<LintResult[]
 }
 
 /**
+ * Check if directory contains .NET project files
+ */
+function hasDotNetProject(workdir: string): boolean {
+  try {
+    const files = readdirSync(workdir);
+    return files.some(file =>
+      file.endsWith('.csproj') ||
+      file.endsWith('.sln') ||
+      file.endsWith('.slnx')  // New .NET solution format
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Lint C# files using dotnet format analyzers
  */
 async function lintCSharp(filename: string, workdir: string): Promise<LintResult[]> {
   const results: LintResult[] = [];
 
-  // Check if this is a .NET project (.csproj or .sln exists)
-  const hasDotNetProject = existsSync(join(workdir, '*.csproj')) ||
-    existsSync(join(workdir, '*.sln'));
-
-  if (!hasDotNetProject) {
+  // Check if this is a .NET project (.csproj, .sln, or .slnx exists)
+  if (!hasDotNetProject(workdir)) {
     return results;
   }
 

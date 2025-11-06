@@ -38,7 +38,7 @@ Paste error logs here
 - **Node.js version:** [e.g., 20.10.0]
 - **Operating System:** [e.g., Ubuntu 22.04, macOS 13]
 - **Release Helper version:** [e.g., v1.0.0, main branch]
-- **OpenAI Model:** [e.g., gpt-5, gpt-5-turbo, gpt-4-turbo]
+- **OpenAI Model:** [e.g., gpt-5, gpt-5-high, o3]
 
 ## 🔧 Configuration
 

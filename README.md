@@ -121,7 +121,7 @@ jobs:
   with:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-    OPENAI_API_MODEL: 'gpt-5-turbo'
+    OPENAI_API_MODEL: 'gpt-5-high'
     REVIEW_LANGUAGE: 'ru'      # Review in Russian
     SILENT_MODE: 'true'        # Reduce notifications
     ENABLE_AST: 'true'         # Deep code analysis
@@ -144,7 +144,7 @@ jobs:
 | Input | Description | Default |
 |-------|-------------|---------|
 | `OPENAI_API_KEY` | OpenAI API key | - |
-| `OPENAI_API_MODEL` | Model (`gpt-5`, `gpt-5-turbo`, `gpt-4-turbo`) | `gpt-5` |
+| `OPENAI_API_MODEL` | Model (`gpt-5`, `gpt-5-high`, `o3`) | `gpt-5` |
 | `OPENAI_API_BASE_URL` | Custom endpoint (Azure, etc.) | `https://api.openai.com/v1` |
 | `REVIEW_LANGUAGE` | Review language (`en`, `ru`, `es`, `fr`, etc.) | `en` |
 | `SILENT_MODE` | Minimize notifications | `false` |
@@ -291,7 +291,7 @@ registerCustomLinter('golangci-lint', {
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_KEY }}
     OPENAI_API_BASE_URL: 'https://your-resource.openai.azure.com/v1'
-    OPENAI_API_MODEL: 'gpt-4'
+    OPENAI_API_MODEL: 'gpt-5'
 ```
 
 ### Multi-Language Teams
@@ -311,7 +311,7 @@ registerCustomLinter('golangci-lint', {
   with:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-    OPENAI_API_MODEL: 'gpt-5-turbo'
+    OPENAI_API_MODEL: 'o3'     # Ultra-advanced reasoning model
     MAX_CHUNK_SIZE: '12000'
     SILENT_MODE: 'true'
 ```

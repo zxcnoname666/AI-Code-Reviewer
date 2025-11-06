@@ -20,7 +20,7 @@ inputs:
     required: false
 
   OPENAI_API_MODEL:
-    description: 'OpenAI model to use (gpt-5, gpt-5-turbo, gpt-4-turbo)'
+    description: 'OpenAI model to use (gpt-5, gpt-5-high, o3)'
     required: false
     default: 'gpt-5'
 
