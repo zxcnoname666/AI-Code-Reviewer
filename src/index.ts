@@ -7,7 +7,7 @@ import { getInput, setFailed, info, warning, startGroup, endGroup } from '@actio
 import { context, getOctokit } from '@actions/github';
 import type { ReviewConfig, ReviewStatistics } from './types/index.js';
 import { getPullRequestInfo, getChangedFiles, postReviewComment, postSilentComment, getReviewEvent, addLabels, removeLabel } from './github/client.js';
-import { performAIReview, parseReviewSummary } from './ai/client.js';
+import { performAIReview, parseReviewSummary, generateAISummary } from './ai/client.js';
 import { createChunks, getChunkingStats } from './chunking/strategy.js';
 import { generateStatisticsReport, generateSummaryBadge } from './stats/visualizer.js';
 
@@ -233,10 +233,23 @@ async function run(): Promise<void> {
 
     endGroup();
 
+    // ====== 7.5. Generate AI Summary ======
+    startGroup('📝 Generating Summary');
+
+    const aiSummary = await generateAISummary(reviewContent, config);
+
+    if (aiSummary) {
+      info('✅ Summary generated');
+    }
+
+    endGroup();
+
     // ====== 8. Post Review to GitHub ======
     startGroup('📤 Posting Review');
 
-    const fullReview = `${summaryBadge}\n\n${reviewContent}\n\n${statsReport}`;
+    const fullReview = aiSummary
+      ? `${summaryBadge}\n\n## 📋 Summary\n\n${aiSummary}\n\n---\n\n${reviewContent}\n\n${statsReport}`
+      : `${summaryBadge}\n\n${reviewContent}\n\n${statsReport}`;
 
     const reviewEvent = getReviewEvent(
       reviewSummary.hasCriticalIssues,

@@ -355,3 +355,60 @@ export function parseReviewSummary(response: string): {
     hasWarnings,
   };
 }
+
+/**
+ * Generate AI summary of the review
+ */
+export async function generateAISummary(
+  reviewContent: string,
+  config: ReviewConfig
+): Promise<string> {
+  if (!config.openaiApiKey) {
+    return ''; // Skip summary if no API key
+  }
+
+  const aiConfig: OpenAIConfig = {
+    apiKey: config.openaiApiKey,
+    model: config.openaiApiModel || 'gpt-5',
+    baseUrl: config.openaiApiBaseUrl || 'https://api.openai.com/v1',
+  };
+
+  try {
+    info('📝 Generating AI summary...');
+
+    const summaryPrompt = `You are a senior code reviewer. Read the following detailed code review and generate a brief, clear summary.
+
+The summary should:
+- Be 3-5 sentences maximum
+- Highlight the most important findings
+- Mention overall code quality
+- Note critical issues if any
+- Be actionable and clear
+
+${config.reviewLanguage !== 'en' ? `Write the summary in ${config.reviewLanguage} language.` : ''}
+
+Review to summarize:
+${reviewContent}
+
+Generate a brief summary:`;
+
+    const response = await callOpenAI(
+      [
+        {
+          role: 'system',
+          content: 'You are a senior code reviewer who writes clear, concise summaries.',
+        },
+        {
+          role: 'user',
+          content: summaryPrompt,
+        },
+      ],
+      aiConfig
+    );
+
+    return cleanupResponse(response).trim();
+  } catch (error: any) {
+    warning(`Failed to generate summary: ${error.message}`);
+    return ''; // Fail gracefully
+  }
+}

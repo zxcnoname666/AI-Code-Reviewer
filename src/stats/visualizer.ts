@@ -27,26 +27,18 @@ export function generateStatisticsReport(stats: ReviewStatistics, issues: Review
  * Generate header with logo
  */
 function generateHeader(): string {
-  const table = new Table({
-    chars: {
-      'top': '━', 'top-mid': '━', 'top-left': '┏', 'top-right': '┓',
-      'bottom': '━', 'bottom-mid': '━', 'bottom-left': '┗', 'bottom-right': '┛',
-      'left': '┃', 'left-mid': '┃', 'mid': '━', 'mid-mid': '━',
-      'right': '┃', 'right-mid': '┃', 'middle': '┃'
-    },
-    style: { 'padding-left': 0, 'padding-right': 0 },
-    colWidths: [69]
-  });
-
-  table.push(
-    [''],
-    ['    🤖  𝗔𝗜 𝗖𝗢𝗗𝗘 𝗥𝗘𝗩𝗜𝗘𝗪 - 𝗔𝗡𝗔𝗟𝗬𝗦𝗜𝗦 𝗖𝗢𝗠𝗣𝗟𝗘𝗧𝗘  🤖'],
-    [''],
-    ['         ⚡ Powered by Advanced AI & Deep Code Analysis ⚡'],
-    ['']
-  );
-
-  return '```\n' + table.toString() + '\n```';
+  // Manual formatting for clean header without internal lines
+  const lines: string[] = [];
+  lines.push('```');
+  lines.push('┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓');
+  lines.push('┃                                                                     ┃');
+  lines.push('┃    🤖 𝗔𝗜 𝗖𝗢𝗗𝗘 𝗥𝗘𝗩𝗜𝗘𝗪 - 𝗔𝗡𝗔𝗟𝗬𝗦𝗜𝗦 𝗖𝗢𝗠𝗣𝗟𝗘𝗧𝗘 🤖          ┃');
+  lines.push('┃                                                                     ┃');
+  lines.push('┃         ⚡ Powered by Advanced AI & Deep Code Analysis ⚡          ┃');
+  lines.push('┃                                                                     ┃');
+  lines.push('┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛');
+  lines.push('```');
+  return lines.join('\n');
 }
 
 /**
@@ -92,39 +84,19 @@ function generateIssuesChart(stats: ReviewStatistics): string {
   const warningPct = total > 0 ? Math.round((stats.warningIssues / total) * 100) : 0;
   const infoPct = total > 0 ? Math.round((stats.infoIssues / total) * 100) : 0;
 
-  const table = new Table({
-    head: [],
-    colWidths: [59],
-    style: { head: [], border: [] }
-  });
-
-  table.push(
-    [`🔴 Critical   ${criticalBar}  ${String(stats.criticalIssues).padStart(3)} (${String(criticalPct).padStart(2)}%)`],
-    [`⚠️  Warnings   ${warningBar}  ${String(stats.warningIssues).padStart(3)} (${String(warningPct).padStart(2)}%)`],
-    [`📘 Info       ${infoBar}  ${String(stats.infoIssues).padStart(3)} (${String(infoPct).padStart(2)}%)`]
-  );
-
-  const divider = new Table({
-    head: [],
-    colWidths: [59],
-    style: { head: [], border: [] },
-    chars: { 'top': '─', 'top-mid': '┼', 'top-left': '├', 'top-right': '┤' }
-  });
-
-  const summaryTable = new Table({
-    head: [],
-    colWidths: [59],
-    style: { head: [], border: [] }
-  });
-
-  summaryTable.push(
-    [`Total Issues: ${stats.issuesFound}`],
-    [`Files Affected: ${stats.filesWithIssues}/${stats.totalFiles}`]
-  );
-
-  let result = '## 🎯 Issues Found\n\n```\n' + table.toString() + '\n';
-  result += divider.toString().split('\n')[0] + '\n';
-  result += summaryTable.toString() + '\n```';
+  // Manual formatting to avoid cli-table3 truncation
+  const lines: string[] = [];
+  lines.push('## 🎯 Issues Found\n');
+  lines.push('```');
+  lines.push('┌─────────────────────────────────────────────────────────┐');
+  lines.push(`│ 🔴 Critical   ${criticalBar}  ${String(stats.criticalIssues).padStart(3)} (${String(criticalPct).padStart(2)}%) │`);
+  lines.push(`│ ⚠️ Warnings   ${warningBar}  ${String(stats.warningIssues).padStart(3)} (${String(warningPct).padStart(2)}%) │`);
+  lines.push(`│ 📘 Info       ${infoBar}  ${String(stats.infoIssues).padStart(3)} (${String(infoPct).padStart(2)}%) │`);
+  lines.push('├─────────────────────────────────────────────────────────┤');
+  lines.push(`│ Total Issues: ${stats.issuesFound.toString().padEnd(42)} │`);
+  lines.push(`│ Files Affected: ${stats.filesWithIssues}/${stats.totalFiles}${' '.repeat(38 - (stats.filesWithIssues.toString() + stats.totalFiles.toString()).length)} │`);
+  lines.push('└─────────────────────────────────────────────────────────┘');
+  lines.push('```');
 
   // Add sparkline visualization
   if (stats.issuesFound > 0) {
@@ -133,10 +105,11 @@ function generateIssuesChart(stats: ReviewStatistics): string {
       stats.warningIssues,
       stats.infoIssues,
     ]);
-    result += '\n\n**Trend**: ' + sparkline + ' (Critical → Warning → Info)';
+    lines.push('');
+    lines.push(`**Trend**: ${sparkline} (Critical → Warning → Info)`);
   }
 
-  return result;
+  return lines.join('\n');
 }
 
 /**
@@ -250,7 +223,7 @@ function generatePerformanceMetrics(stats: ReviewStatistics): string {
 
   lines.push('## ⚡ Performance Metrics\n');
   lines.push('```');
-  lines.push(`⏱️  Review Time:       ${formatDuration(stats.reviewTime)}`);
+  lines.push(`⏱️ Review Time:       ${formatDuration(stats.reviewTime)}`);
   lines.push(`📄 Files/Minute:      ${filesPerMinute}`);
   lines.push(`📝 Lines/Second:      ${linesPerSecond}`);
   lines.push(`🤖 Tokens Used:       ${stats.tokensUsed.toLocaleString()}`);

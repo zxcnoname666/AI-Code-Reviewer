@@ -492,21 +492,29 @@ ${
     ? `
 ## Language Requirement
 
-**IMPORTANT**: After completing your analysis in English, translate your ENTIRE final review to **${config.reviewLanguage}** language.
+**CRITICAL**: Write your ENTIRE review DIRECTLY in **${config.reviewLanguage}** language from the start.
 
-Preserve:
-- All code snippets and technical terms
-- File names and paths
-- Function/variable names
+DO NOT write in English first and then translate. Write IMMEDIATELY in ${config.reviewLanguage}.
+
+Preserve in original form:
+- Code snippets (keep as-is)
+- File names and paths (src/example.ts)
+- Function/variable names (calculatePrice, userId)
+- Technical terms (async/await, TypeScript, AST)
 - Markdown formatting
 
-Translate:
-- All explanatory text
-- Issue descriptions
-- Recommendations
-- Comments
+Write in ${config.reviewLanguage}:
+- ALL explanatory text and descriptions
+- Issue titles and descriptions
+- Recommendations and suggestions
+- Comments and notes
+- Section headings
 
-The final output must be in ${config.reviewLanguage}.
+Example (for Russian):
+❌ WRONG: "This function is inefficient" → translated to Russian
+✅ RIGHT: Write directly "Эта функция неэффективна"
+
+The ENTIRE review must be in ${config.reviewLanguage} from the very first word.
 `
     : ''
 }
