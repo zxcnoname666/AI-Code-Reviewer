@@ -30,13 +30,14 @@
     "@typescript-eslint/parser": "^6.19.0",
     "acorn": "^8.11.3",
     "acorn-walk": "^8.3.2",
+    "cli-table3": "^0.6.5",
     "espree": "^10.0.1",
     "glob": "^11.0.0",
     "tiktoken": "^1.0.10"
   },
   "devDependencies": {
-    "@types/node": "^20.17.6",
     "@types/babel__core": "^7.20.5",
+    "@types/node": "^20.17.6",
     "@typescript-eslint/eslint-plugin": "^6.19.0",
     "esbuild": "^0.25.0",
     "eslint": "^8.56.0",
