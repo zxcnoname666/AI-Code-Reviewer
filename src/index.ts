@@ -7,7 +7,7 @@ import { getInput, setFailed, info, warning, startGroup, endGroup } from '@actio
 import { context, getOctokit } from '@actions/github';
 import type { ReviewConfig, ReviewStatistics } from './types/index.js';
 import { getPullRequestInfo, getChangedFiles, postReviewComment, postSilentComment, getReviewEvent, addLabels, removeLabel } from './github/client.js';
-import { performAIReview, parseReviewSummary } from './ai/client.js';
+import { performAIReview, parseReviewSummary, generateSummary } from './ai/client.js';
 import { createChunks, getChunkingStats } from './chunking/strategy.js';
 import { generateStatisticsReport, generateSummaryBadge } from './stats/visualizer.js';
 
@@ -238,6 +238,12 @@ async function run(): Promise<void> {
 
     const fullReview = `${summaryBadge}\n\n${reviewContent}\n\n${statsReport}`;
 
+    // Generate concise summary
+    const aiSummary = await generateSummary(fullReview, config);
+    const finalReview = aiSummary
+      ? `## 📋 Executive Summary\n\n${aiSummary}\n\n---\n\n${fullReview}`
+      : fullReview;
+
     const reviewEvent = getReviewEvent(
       reviewSummary.hasCriticalIssues,
       reviewSummary.hasWarnings
@@ -245,10 +251,10 @@ async function run(): Promise<void> {
 
     if (config.silentMode) {
       info('Posting in silent mode...');
-      await postSilentComment(octokit, owner, repo, pullNumber, fullReview);
+      await postSilentComment(octokit, owner, repo, pullNumber, finalReview);
     } else {
       info(`Posting review as: ${reviewEvent}`);
-      await postReviewComment(octokit, owner, repo, pullNumber, fullReview, reviewEvent);
+      await postReviewComment(octokit, owner, repo, pullNumber, finalReview, reviewEvent);
     }
 
     // Add labels based on review

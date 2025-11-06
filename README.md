@@ -6,7 +6,7 @@
 
 **AI-Powered Code Review | Deep Static Analysis | Beautiful Statistics**
 
-[![GitHub Release](https://img.shields.io/github/v/release/zxcnoname666/AI-Code-Reviewer?style=flat-square&logo=github)](https://github.com/zxcnoname666/AI-Code-Reviewer/releases)
+[![GitHub Release](https://img.shields.io/github/v/release/zxcnoname666/AI-Code-Review?style=flat-square&logo=github)](https://github.com/zxcnoname666/AI-Code-Review/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen?style=flat-square)](https://nodejs.org)
@@ -40,7 +40,8 @@
 - **Latest AI Models**: GPT-5, Claude Opus 4, Gemini 2.5 Pro, O3/O4 reasoning models
 - **Custom Endpoints**: Azure OpenAI, AWS Bedrock, local models, or any OpenAI-compatible API
 - **Tool Calling System**: AI uses 14 specialized analysis tools to investigate code
-- **Multi-Language Support**: Review comments in any language
+- **AI-Generated Summary**: Automatically generates concise executive summaries of detailed reviews
+- **Multi-Language Support**: Review comments and summaries in any language
 - **Senior-Level Feedback**: Principal/Staff engineer perspective with deep "why" explanations
 - **Context-Aware**: Understands commit history, PR context, and code evolution
 
@@ -54,13 +55,23 @@
 - **Call Graph Analysis**: Understand function relationships and impact
 - **Multi-Language**: TypeScript, JavaScript, Python, Rust, C#, Go, and more
 
-### 📊 **Beautiful Statistics**
+### 📊 **Beautiful Statistics & AI Summary**
 
 ```
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                                                     ┃
 ┃    🤖  𝗔𝗜 𝗖𝗢𝗗𝗘 𝗥𝗘𝗩𝗜𝗘𝗪 - 𝗔𝗡𝗔𝗟𝗬𝗦𝗜𝗦 𝗖𝗢𝗠𝗣𝗟𝗘𝗧𝗘  🤖          ┃
+┃                                                                     ┃
 ┃         ⚡ Powered by Advanced AI & Deep Code Analysis ⚡          ┃
+┃                                                                     ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+## 📋 Executive Summary
+This PR refactors the authentication module to improve security and maintainability.
+Key changes include migrating from JWT to OAuth 2.0, adding rate limiting, and
+improving error handling. Two minor issues found related to logging and edge cases,
+but overall the changes significantly enhance the security posture.
+**Verdict**: ✅ APPROVED with minor suggestions
 
 ## 📊 Review Overview
 ┌─────────────────────────────────────────────────────────────┐
@@ -124,7 +135,7 @@ jobs:
           fetch-depth: 0  # Important for commit history
 
       - name: AI Code Review
-        uses: zxcnoname666/AI-Code-Reviewer@v1
+        uses: zxcnoname666/AI-Code-Review@v1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -163,7 +174,7 @@ jobs:
           fetch-depth: 0
 
       - name: AI Code Review
-        uses: zxcnoname666/AI-Code-Reviewer@v1
+        uses: zxcnoname666/AI-Code-Review@v1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -175,7 +186,7 @@ Now you can trigger reviews by commenting `/review` on any PR!
 
 ```yaml
 - name: AI Code Review
-  uses: zxcnoname666/AI-Code-Reviewer@v1
+  uses: zxcnoname666/AI-Code-Review@v1
   with:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -264,7 +275,13 @@ The AI actively investigates code using specialized tools:
 - Creates beautiful statistics with quality scores
 - Generates actionable feedback
 
-### 6. Post to GitHub
+### 6. AI Summary Generation
+- Sends full review to AI for concise summary generation
+- Creates brief but comprehensive executive summary (under 300 words)
+- Includes: main changes, critical findings, key recommendations, verdict
+- Automatically translated to target language if configured
+
+### 7. Post to GitHub
 - Posts comprehensive review comment
 - Adds inline comments on specific lines
 - Manages labels automatically (needs-review, approved, etc.)
@@ -278,9 +295,18 @@ The AI actively investigates code using specialized tools:
 
 ```markdown
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                                                     ┃
 ┃    🤖  𝗔𝗜 𝗖𝗢𝗗𝗘 𝗥𝗘𝗩𝗜𝗘𝗪 - 𝗔𝗡𝗔𝗟𝗬𝗦𝗜𝗦 𝗖𝗢𝗠𝗣𝗟𝗘𝗧𝗘  🤖          ┃
+┃                                                                     ┃
 ┃         ⚡ Powered by Advanced AI & Deep Code Analysis ⚡          ┃
+┃                                                                     ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+## 📋 Executive Summary
+This PR implements a new caching layer for the API to reduce database load and improve
+response times. The implementation is solid with good error handling and test coverage.
+Found 2 performance optimizations and 1 suggestion for documentation, but no blocking
+issues. **Verdict**: ✅ APPROVED
 
 ## 📊 Review Overview
 ┌─────────────────────────────────────────────────────────────┐
@@ -361,7 +387,7 @@ const posts = await db.query(`
 ### Use with Claude Opus 4 (Anthropic)
 
 ```yaml
-- uses: zxcnoname666/AI-Code-Reviewer@v1
+- uses: zxcnoname666/AI-Code-Review@v1
   with:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     OPENAI_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -372,7 +398,7 @@ const posts = await db.query(`
 ### Use with Gemini 2.5 Pro (Google)
 
 ```yaml
-- uses: zxcnoname666/AI-Code-Reviewer@v1
+- uses: zxcnoname666/AI-Code-Review@v1
   with:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     OPENAI_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
@@ -384,7 +410,7 @@ const posts = await db.query(`
 ### Use with Azure OpenAI
 
 ```yaml
-- uses: zxcnoname666/AI-Code-Reviewer@v1
+- uses: zxcnoname666/AI-Code-Review@v1
   with:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_KEY }}
@@ -395,7 +421,7 @@ const posts = await db.query(`
 ### Use with O3 Reasoning Model
 
 ```yaml
-- uses: zxcnoname666/AI-Code-Reviewer@v1
+- uses: zxcnoname666/AI-Code-Review@v1
   with:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -505,7 +531,7 @@ The AI can now **intelligently warn** that all 8 call sites need updating!
 ### Multi-Language Teams
 
 ```yaml
-- uses: zxcnoname666/AI-Code-Reviewer@v1
+- uses: zxcnoname666/AI-Code-Review@v1
   with:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -515,7 +541,7 @@ The AI can now **intelligently warn** that all 8 call sites need updating!
 ### High-Performance Setup for Large Codebases
 
 ```yaml
-- uses: zxcnoname666/AI-Code-Reviewer@v1
+- uses: zxcnoname666/AI-Code-Review@v1
   with:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -537,8 +563,8 @@ The AI can now **intelligently warn** that all 8 call sites need updating!
 ### Setup
 
 ```bash
-git clone https://github.com/zxcnoname666/AI-Code-Reviewer.git
-cd AI-Code-Reviewer
+git clone https://github.com/zxcnoname666/AI-Code-Review.git
+cd AI-Code-Review
 pnpm install
 pnpm build
 ```
@@ -618,10 +644,10 @@ MIT License - see [LICENSE](LICENSE)
 
 ## 📞 Support
 
-- 🐛 [Report Bug](https://github.com/zxcnoname666/AI-Code-Reviewer/issues)
-- 💡 [Request Feature](https://github.com/zxcnoname666/AI-Code-Reviewer/issues)
-- 💬 [Discussions](https://github.com/zxcnoname666/AI-Code-Reviewer/discussions)
-- 📖 [Documentation](https://github.com/zxcnoname666/AI-Code-Reviewer)
+- 🐛 [Report Bug](https://github.com/zxcnoname666/AI-Code-Review/issues)
+- 💡 [Request Feature](https://github.com/zxcnoname666/AI-Code-Review/issues)
+- 💬 [Discussions](https://github.com/zxcnoname666/AI-Code-Review/discussions)
+- 📖 [Documentation](https://github.com/zxcnoname666/AI-Code-Review)
 
 ---
 

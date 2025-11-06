@@ -29,9 +29,9 @@ export function generateStatisticsReport(stats: ReviewStatistics, issues: Review
 function generateHeader(): string {
   const table = new Table({
     chars: {
-      'top': '━', 'top-mid': '━', 'top-left': '┏', 'top-right': '┓',
-      'bottom': '━', 'bottom-mid': '━', 'bottom-left': '┗', 'bottom-right': '┛',
-      'left': '┃', 'left-mid': '┃', 'mid': '━', 'mid-mid': '━',
+      'top': '━', 'top-mid': '⁤', 'top-left': '┏', 'top-right': '┓',
+      'bottom': '━', 'bottom-mid': '⁤', 'bottom-left': '┗', 'bottom-right': '┛',
+      'left': '┃', 'left-mid': '┃', 'mid': '⁤', 'mid-mid': '⁤',
       'right': '┃', 'right-mid': '┃', 'middle': '┃'
     },
     style: { 'padding-left': 0, 'padding-right': 0 },
@@ -94,7 +94,7 @@ function generateIssuesChart(stats: ReviewStatistics): string {
 
   const table = new Table({
     head: [],
-    colWidths: [59],
+    colWidths: [70],
     style: { head: [], border: [] }
   });
 
@@ -106,14 +106,14 @@ function generateIssuesChart(stats: ReviewStatistics): string {
 
   const divider = new Table({
     head: [],
-    colWidths: [59],
+    colWidths: [70],
     style: { head: [], border: [] },
     chars: { 'top': '─', 'top-mid': '┼', 'top-left': '├', 'top-right': '┤' }
   });
 
   const summaryTable = new Table({
     head: [],
-    colWidths: [59],
+    colWidths: [70],
     style: { head: [], border: [] }
   });
 
@@ -250,7 +250,7 @@ function generatePerformanceMetrics(stats: ReviewStatistics): string {
 
   lines.push('## ⚡ Performance Metrics\n');
   lines.push('```');
-  lines.push(`⏱️  Review Time:       ${formatDuration(stats.reviewTime)}`);
+  lines.push(`⏱️ Review Time:       ${formatDuration(stats.reviewTime)}`);
   lines.push(`📄 Files/Minute:      ${filesPerMinute}`);
   lines.push(`📝 Lines/Second:      ${linesPerSecond}`);
   lines.push(`🤖 Tokens Used:       ${stats.tokensUsed.toLocaleString()}`);
@@ -423,9 +423,9 @@ export function generateSummaryBadge(stats: ReviewStatistics): string {
 
   const table = new Table({
     chars: {
-      'top': '━', 'top-mid': '━', 'top-left': '┏', 'top-right': '┓',
-      'bottom': '━', 'bottom-mid': '━', 'bottom-left': '┗', 'bottom-right': '┛',
-      'left': '┃', 'left-mid': '┃', 'mid': '━', 'mid-mid': '━',
+      'top': '━', 'top-mid': '⁤', 'top-left': '┏', 'top-right': '┓',
+      'bottom': '━', 'bottom-mid': '⁤', 'bottom-left': '┗', 'bottom-right': '┛',
+      'left': '┃', 'left-mid': '┃', 'mid': '⁤', 'mid-mid': '⁤',
       'right': '┃', 'right-mid': '┃', 'middle': '┃'
     },
     style: { 'padding-left': 0, 'padding-right': 0 },

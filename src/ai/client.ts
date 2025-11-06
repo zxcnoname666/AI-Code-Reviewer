@@ -355,3 +355,61 @@ export function parseReviewSummary(response: string): {
     hasWarnings,
   };
 }
+
+/**
+ * Generate concise summary from full review
+ */
+export async function generateSummary(
+  fullReview: string,
+  config: ReviewConfig
+): Promise<string> {
+  if (!config.openaiApiKey) {
+    throw new Error('OpenAI API key is required for summary generation');
+  }
+
+  const aiConfig: OpenAIConfig = {
+    apiKey: config.openaiApiKey,
+    model: config.openaiApiModel || 'gpt-5',
+    baseUrl: config.openaiApiBaseUrl || 'https://api.openai.com/v1',
+  };
+
+  info('📝 Generating concise summary...');
+
+  const language = config.reviewLanguage || 'en';
+  const langInstruction = language !== 'en'
+    ? `Write your summary in ${language} language.`
+    : '';
+
+  const messages = [
+    {
+      role: 'system',
+      content: `You are a senior software engineer creating concise summaries of code reviews.
+Your task is to read a detailed code review and create a brief but comprehensive summary that captures:
+- The main purpose of the changes
+- Critical issues found (if any)
+- Key recommendations
+- Overall assessment
+
+Keep the summary under 300 words but make it informative and actionable. ${langInstruction}`,
+    },
+    {
+      role: 'user',
+      content: `Please create a concise summary of this code review:\n\n${fullReview}\n\n---\n\nProvide a summary that includes:
+1. What changes were made (1-2 sentences)
+2. Critical findings (if any)
+3. Main recommendations
+4. Overall verdict
+
+Keep it brief but informative.`,
+    },
+  ];
+
+  try {
+    const response = await callOpenAI(messages, aiConfig);
+    info('✅ Summary generated');
+    return cleanupResponse(response);
+  } catch (error: any) {
+    warning(`Failed to generate summary: ${error.message}`);
+    return ''; // Return empty string if summary fails - don't block the main review
+  }
+}

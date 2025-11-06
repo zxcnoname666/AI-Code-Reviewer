@@ -1,6 +1,6 @@
-# Contributing to AI Code Reviewer
+# Contributing to AI Code Review
 
-First off, thank you for considering contributing to AI Code Reviewer! 🎉 It's people like you that make this project better for everyone.
+First off, thank you for considering contributing to AI Code Review! 🎉 It's people like you that make this project better for everyone.
 
 ## 🌟 Ways to Contribute
 
@@ -25,7 +25,7 @@ Before creating a bug report, please check if the issue has already been reporte
 - **Environment details**:
   - Node.js version
   - Operating system
-  - AI Code Reviewer version
+  - AI Code Review version
   - AI model being used
   - Relevant configuration
 
@@ -48,7 +48,7 @@ When using Azure OpenAI endpoint, the action fails with error "Invalid API endpo
 **Environment:**
 - Node.js: 20.10.0
 - OS: Ubuntu 22.04
-- AI Code Reviewer: v1.0.0
+- AI Code Review: v1.0.0
 - Model: gpt-5 (Azure)
 ```
 
@@ -93,8 +93,8 @@ Include in your feature request:
 
 1. **Fork and clone the repository:**
 ```bash
-git clone https://github.com/YOUR_USERNAME/AI-Code-Reviewer.git
-cd AI-Code-Reviewer
+git clone https://github.com/YOUR_USERNAME/AI-Code-Review.git
+cd AI-Code-Review
 ```
 
 2. **Install dependencies:**
@@ -310,7 +310,7 @@ export async function generateReview(
 Currently, testing is primarily manual. To test your changes:
 
 1. **Create a test repository** with various file types and languages
-2. **Set up AI Code Reviewer** with your changes (use local build)
+2. **Set up AI Code Review** with your changes (use local build)
 3. **Create test PRs** with different scenarios:
    - Small PRs (1-2 files)
    - Large PRs (10+ files, 1000+ lines)
@@ -460,7 +460,7 @@ Contributors are recognized in:
 
 Have questions about contributing?
 
-- Open a [Discussion](https://github.com/zxcnoname666/AI-Code-Reviewer/discussions)
+- Open a [Discussion](https://github.com/zxcnoname666/AI-Code-Review/discussions)
 - Comment on existing issues
 - Reach out to maintainers
 
@@ -472,6 +472,6 @@ By contributing, you agree that your contributions will be licensed under the MI
 
 ## 🙏 Thank You!
 
-Every contribution, no matter how small, makes a difference. Thank you for helping make AI Code Reviewer better! 🚀
+Every contribution, no matter how small, makes a difference. Thank you for helping make AI Code Review better! 🚀
 
 **Happy Coding!** 💻✨

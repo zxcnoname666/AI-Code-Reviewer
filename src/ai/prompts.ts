@@ -492,21 +492,15 @@ ${
     ? `
 ## Language Requirement
 
-**IMPORTANT**: After completing your analysis in English, translate your ENTIRE final review to **${config.reviewLanguage}** language.
+**CRITICAL**: Generate your ENTIRE review DIRECTLY in **${config.reviewLanguage}** language. DO NOT write in English first - think and write directly in ${config.reviewLanguage}.
 
-Preserve:
-- All code snippets and technical terms
-- File names and paths
-- Function/variable names
-- Markdown formatting
+Requirements:
+- Write ALL explanatory text, descriptions, and comments in ${config.reviewLanguage}
+- Keep code snippets, technical terms, file names, and paths in their original form
+- Maintain all markdown formatting
+- Think and formulate your thoughts directly in ${config.reviewLanguage}
 
-Translate:
-- All explanatory text
-- Issue descriptions
-- Recommendations
-- Comments
-
-The final output must be in ${config.reviewLanguage}.
+**Do NOT**: Write in English and translate. Write directly in ${config.reviewLanguage} from the start.
 `
     : ''
 }
