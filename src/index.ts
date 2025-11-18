@@ -172,7 +172,8 @@ async function run(): Promise<void> {
           { ...prInfo, filesChanged: chunk.files.length },
           chunk.files,
           config,
-          process.cwd()
+          process.cwd(),
+          files // Pass all files for context
         );
 
         chunkReviews.push(`## Chunk ${i + 1}: ${chunk.reason}\n\nFiles:\n\`\`\`\n${chunk.files.map(f => f.filename).join('\n')}\n\`\`\`\n\n${chunkReview}`);

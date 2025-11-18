@@ -58,7 +58,8 @@ export async function performAIReview(
   pr: PullRequestInfo,
   files: FileChange[],
   config: ReviewConfig,
-  workdir: string
+  workdir: string,
+  allFiles?: FileChange[]
 ): Promise<string> {
   if (!config.openaiApiKey) {
     throw new Error('OpenAI API key is required for AI review');
@@ -72,7 +73,7 @@ export async function performAIReview(
 
   const toolContext: ToolContext = {
     workdir,
-    files,
+    files: allFiles || files, // Use all files for tools context
     baseSha: pr.baseSha,
     headSha: pr.headSha,
   };
@@ -80,9 +81,12 @@ export async function performAIReview(
   info('🤖 Starting AI code review...');
   info(`Model: ${aiConfig.model}`);
   info(`Files to review: ${files.length}`);
+  if (allFiles && allFiles.length > files.length) {
+    info(`Total files in PR: ${allFiles.length} (reviewing ${files.length} in this chunk)`);
+  }
 
   const systemPrompt = generateSystemPrompt();
-  const userPrompt = generateUserPrompt(pr, files, config);
+  const userPrompt = generateUserPrompt(pr, files, config, allFiles);
 
   const messages = [
     { role: 'system', content: systemPrompt },
