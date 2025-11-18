@@ -359,8 +359,12 @@ Remember: Your review can prevent production incidents, security breaches, and t
 export function generateUserPrompt(
   pr: PullRequestInfo,
   files: FileChange[],
-  config: ReviewConfig
+  config: ReviewConfig,
+  allFiles?: FileChange[]
 ): string {
+  // Check if this is a chunk review (subset of total files)
+  const isChunkReview = allFiles && allFiles.length > files.length;
+
   const filesSummary = files
     .map(
       f =>
@@ -368,8 +372,21 @@ export function generateUserPrompt(
     )
     .join('\n');
 
+  // Generate summary of all files in PR for context
+  const allFilesSummary = isChunkReview
+    ? allFiles!
+        .map(
+          f =>
+            `- **${f.filename}** (${f.status}): +${f.additions} -${f.deletions} (${f.language || 'unknown'})`
+        )
+        .join('\n')
+    : '';
+
   const totalAdditions = files.reduce((sum, f) => sum + f.additions, 0);
   const totalDeletions = files.reduce((sum, f) => sum + f.deletions, 0);
+
+  const allTotalAdditions = isChunkReview ? allFiles!.reduce((sum, f) => sum + f.additions, 0) : totalAdditions;
+  const allTotalDeletions = isChunkReview ? allFiles!.reduce((sum, f) => sum + f.deletions, 0) : totalDeletions;
 
   return `# Code Review Request
 
@@ -385,13 +402,46 @@ ${pr.body || '(No description provided)'}
 ## Changes Overview
 
 - **Files Changed**: ${pr.filesChanged}
-- **Total Additions**: +${totalAdditions}
-- **Total Deletions**: -${totalDeletions}
-- **Net Change**: ${totalAdditions - totalDeletions > 0 ? '+' : ''}${totalAdditions - totalDeletions} lines
+- **Total Additions**: +${allTotalAdditions}
+- **Total Deletions**: -${allTotalDeletions}
+- **Net Change**: ${allTotalAdditions - allTotalDeletions > 0 ? '+' : ''}${allTotalAdditions - allTotalDeletions} lines
 
-## Files Modified
+${
+  isChunkReview
+    ? `## ⚠️ IMPORTANT: Chunk Review Context
+
+**This is a PARTIAL review of a large PR**. You are reviewing ${files.length} out of ${allFiles!.length} total files.
+
+### All Files in This PR (For Context)
+
+The complete PR includes these ${allFiles!.length} files:
+
+${allFilesSummary}
+
+**CRITICAL INSTRUCTIONS**:
+- ✅ **You can see ALL files above for CONTEXT** - use this to verify imports, dependencies, and references
+- 🎯 **Analyze ONLY the files in the "Files to Review" section below** in detail
+- 🔍 **Before flagging "file not found" or "undefined import"**, CHECK if the file exists in the full file list above
+- 📦 **Other chunks** may have already reviewed or will review the remaining files
+- 🚫 **Do NOT complain about files being missing** if they appear in the "All Files in This PR" list above
+- ✨ **Focus on the subset below**, but use the full context to make informed decisions
+
+### Files to Review in This Chunk
+
+Review these ${files.length} files in detail:
 
 ${filesSummary}
+
+**Chunk Statistics**:
+- Files in this chunk: ${files.length}/${allFiles!.length}
+- Additions in this chunk: +${totalAdditions}
+- Deletions in this chunk: -${totalDeletions}
+- Net change in this chunk: ${totalAdditions - totalDeletions > 0 ? '+' : ''}${totalAdditions - totalDeletions} lines
+`
+    : `## Files Modified
+
+${filesSummary}`
+}
 
 ## Review Instructions
 
