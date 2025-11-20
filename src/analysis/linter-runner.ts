@@ -198,40 +198,68 @@ async function lintJavaScript(filename: string, workdir: string): Promise<LintRe
 
   try {
     let output = '';
+    let errorOutput = '';
 
-    await exec(
-      'npx',
-      ['eslint', '--format', 'json', filename],
-      {
-        cwd: workdir,
-        ignoreReturnCode: true,
-        listeners: {
-          stdout: (data: Buffer) => {
-            output += data.toString();
-          },
+    // Try to use local ESLint first, fallback to npx
+    const localEslintPath = join(workdir, 'node_modules', '.bin', 'eslint');
+    const useLocalEslint = existsSync(localEslintPath);
+
+    const command = useLocalEslint ? localEslintPath : 'npx';
+    const args = useLocalEslint
+      ? ['--format', 'json', filename]
+      : ['--yes', 'eslint', '--format', 'json', filename];
+
+    console.log(`Running linter: ${useLocalEslint ? 'local ESLint' : 'npx eslint'}`);
+
+    const exitCode = await exec(command, args, {
+      cwd: workdir,
+      ignoreReturnCode: true,
+      listeners: {
+        stdout: (data: Buffer) => {
+          output += data.toString();
         },
-      }
-    );
+        stderr: (data: Buffer) => {
+          errorOutput += data.toString();
+        },
+      },
+    });
+
+    // Check for missing dependencies error
+    if (errorOutput && errorOutput.includes('Cannot find package')) {
+      console.warn(`ESLint configuration error: Missing dependencies in project`);
+      console.warn(`Project may need to run: npm install`);
+      return results; // Return empty results instead of failing
+    }
 
     if (output) {
-      const eslintResults = JSON.parse(output);
+      try {
+        const eslintResults = JSON.parse(output);
 
-      for (const fileResult of eslintResults) {
-        for (const message of fileResult.messages || []) {
-          results.push({
-            file: filename,
-            line: message.line,
-            column: message.column,
-            severity: mapESLintSeverity(message.severity),
-            message: message.message,
-            ruleId: message.ruleId || 'unknown',
-            source: message.source,
-          });
+        for (const fileResult of eslintResults) {
+          for (const message of fileResult.messages || []) {
+            results.push({
+              file: filename,
+              line: message.line,
+              column: message.column,
+              severity: mapESLintSeverity(message.severity),
+              message: message.message,
+              ruleId: message.ruleId || 'unknown',
+              source: message.source,
+            });
+          }
         }
+      } catch (parseError) {
+        console.warn(`Failed to parse ESLint output: ${parseError}`);
       }
     }
-  } catch (error) {
-    console.warn(`ESLint execution failed for ${filename}`);
+  } catch (error: any) {
+    // Gracefully handle linter failures without blocking the review
+    const errorMsg = error.message || String(error);
+    if (errorMsg.includes('Cannot find package') || errorMsg.includes('ERR_MODULE_NOT_FOUND')) {
+      console.warn(`ESLint configuration error: Missing dependencies. Skipping linter for ${filename}`);
+    } else {
+      console.warn(`ESLint execution failed for ${filename}: ${errorMsg}`);
+    }
   }
 
   return results;
