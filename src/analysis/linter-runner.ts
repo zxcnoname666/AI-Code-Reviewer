@@ -9,6 +9,11 @@ import { existsSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 /**
+ * Track if dependencies have been installed to avoid redundant installs
+ */
+let dependenciesInstalled = false;
+
+/**
  * Custom linter configuration
  */
 export interface CustomLinterConfig {
@@ -127,6 +132,62 @@ async function runCustomLinter(
 }
 
 /**
+ * Install project dependencies if not already installed
+ */
+async function ensureDependenciesInstalled(workdir: string): Promise<void> {
+  // Skip if already installed in this session
+  if (dependenciesInstalled) {
+    return;
+  }
+
+  const nodeModulesPath = join(workdir, 'node_modules');
+  const hasNodeModules = existsSync(nodeModulesPath);
+
+  // If node_modules exists, assume dependencies are installed
+  if (hasNodeModules) {
+    dependenciesInstalled = true;
+    return;
+  }
+
+  console.log('Installing project dependencies...');
+
+  try {
+    // Determine which package manager to use
+    const hasPnpmLock = existsSync(join(workdir, 'pnpm-lock.yaml'));
+    const hasYarnLock = existsSync(join(workdir, 'yarn.lock'));
+    const hasPackageLock = existsSync(join(workdir, 'package-lock.json'));
+
+    let command: string;
+    let args: string[] = ['install'];
+
+    if (hasPnpmLock) {
+      command = 'pnpm';
+    } else if (hasYarnLock) {
+      command = 'yarn';
+      args = []; // yarn install doesn't need 'install' arg
+    } else if (hasPackageLock) {
+      command = 'npm';
+      args = ['ci']; // npm ci is faster and more reliable for CI
+    } else {
+      command = 'npm';
+    }
+
+    console.log(`Running: ${command} ${args.join(' ')}`);
+
+    await exec(command, args, {
+      cwd: workdir,
+      ignoreReturnCode: false,
+    });
+
+    dependenciesInstalled = true;
+    console.log('Dependencies installed successfully');
+  } catch (error) {
+    console.warn('Failed to install dependencies:', error);
+    // Don't throw - let the linter try to run anyway
+  }
+}
+
+/**
  * Default ESLint 9+ flat config for projects without config
  */
 const DEFAULT_ESLINT_CONFIG_V9 = `// ESLint flat config (v9+)
@@ -169,6 +230,9 @@ export default [
  */
 async function lintJavaScript(filename: string, workdir: string): Promise<LintResult[]> {
   const results: LintResult[] = [];
+
+  // Ensure dependencies are installed before running ESLint
+  await ensureDependenciesInstalled(workdir);
 
   // Check if ESLint is available in the project
   const eslintConfigFiles = [
