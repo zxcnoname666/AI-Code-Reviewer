@@ -52,6 +52,14 @@ const MAX_ITERATIONS = 50; // Increased for thorough reviews
 const MAX_TOKENS = 4000;
 
 /**
+ * Retry configuration for OpenAI API calls
+ */
+const MAX_RETRIES = 3;
+const INITIAL_RETRY_DELAY = 2000; // 2 seconds
+const MAX_RETRY_DELAY = 16000; // 16 seconds
+const REQUEST_TIMEOUT = 60000; // 60 seconds
+
+/**
  * Perform AI code review with tool support
  */
 export async function performAIReview(
@@ -182,7 +190,29 @@ export async function performAIReview(
 }
 
 /**
- * Call OpenAI API
+ * Sleep for specified milliseconds
+ */
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Check if error is retryable (network/timeout errors, not API errors)
+ */
+function isRetryableError(error: any): boolean {
+  const message = error.message?.toLowerCase() || '';
+  return (
+    message.includes('timeout') ||
+    message.includes('fetch failed') ||
+    message.includes('network') ||
+    message.includes('econnreset') ||
+    message.includes('enotfound') ||
+    message.includes('etimedout')
+  );
+}
+
+/**
+ * Call OpenAI API with retry logic and timeout
  */
 async function callOpenAI(
   messages: Array<{ role: string; content: string }>,
@@ -202,76 +232,114 @@ async function callOpenAI(
     },
   }));
 
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${config.apiKey}`,
-      },
-      body: JSON.stringify({
-        model: config.model,
-        messages,
-        temperature: 0.3, // Lower temperature for more focused, consistent reviews
-        max_tokens: MAX_TOKENS,
-        top_p: 0.95,
-        tools,
-        tool_choice: 'auto', // Let model decide when to use tools
-      }),
-    });
+  let lastError: Error | null = null;
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`OpenAI API error (${response.status}): ${error}`);
-    }
+  // Retry loop with exponential backoff
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      // Create AbortController for timeout
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort(), REQUEST_TIMEOUT);
 
-    const data = await response.json() as OpenAIResponse;
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${config.apiKey}`,
+          },
+          body: JSON.stringify({
+            model: config.model,
+            messages,
+            temperature: 0.3, // Lower temperature for more focused, consistent reviews
+            max_tokens: MAX_TOKENS,
+            top_p: 0.95,
+            tools,
+            tool_choice: 'auto', // Let model decide when to use tools
+          }),
+          signal: abortController.signal,
+        });
 
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      throw new Error('Invalid response format from OpenAI API');
-    }
+        clearTimeout(timeoutId);
 
-    const message = data.choices[0].message;
-    let content = message.content || '';
+        if (!response.ok) {
+          const error = await response.text();
+          // Don't retry API errors (4xx, 5xx)
+          throw new Error(`OpenAI API error (${response.status}): ${error}`);
+        }
 
-    // Debug: Log message structure if content is empty but we have tokens
-    if (!content && data.usage && data.usage.completion_tokens > 50) {
-      warning(`Received ${data.usage.completion_tokens} completion tokens but empty content`);
-      warning(`Message keys: ${Object.keys(message).join(', ')}`);
-      if (message.refusal) {
-        warning(`Model refused: ${message.refusal}`);
+        const data = await response.json() as OpenAIResponse;
+
+        if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+          throw new Error('Invalid response format from OpenAI API');
+        }
+
+        const message = data.choices[0].message;
+        let content = message.content || '';
+
+        // Debug: Log message structure if content is empty but we have tokens
+        if (!content && data.usage && data.usage.completion_tokens > 50) {
+          warning(`Received ${data.usage.completion_tokens} completion tokens but empty content`);
+          warning(`Message keys: ${Object.keys(message).join(', ')}`);
+          if (message.refusal) {
+            warning(`Model refused: ${message.refusal}`);
+          }
+        }
+
+        // Handle structured tool calls from API
+        // Some models return tool_calls in a separate field instead of in content
+        if (message.tool_calls && message.tool_calls.length > 0) {
+          const toolCallsJson = message.tool_calls.map((tc: any) => ({
+            name: tc.function?.name || tc.name,
+            arguments: typeof tc.function?.arguments === 'string'
+              ? JSON.parse(tc.function.arguments)
+              : (tc.function?.arguments || tc.arguments || {}),
+          }));
+
+          // Format tool calls as JSON block so parseToolCalls can process them
+          const toolCallsBlock = '\n\n```json\n' + JSON.stringify(toolCallsJson, null, 2) + '\n```\n';
+          content = content ? content + toolCallsBlock : toolCallsBlock;
+        }
+
+        // Log token usage
+        if (data.usage) {
+          info(
+            `  Tokens: ${data.usage.prompt_tokens} prompt + ${data.usage.completion_tokens} completion = ${data.usage.total_tokens} total`
+          );
+        }
+
+        return content;
+      } finally {
+        clearTimeout(timeoutId);
       }
-    }
+    } catch (error: any) {
+      lastError = error;
 
-    // Handle structured tool calls from API
-    // Some models return tool_calls in a separate field instead of in content
-    if (message.tool_calls && message.tool_calls.length > 0) {
-      const toolCallsJson = message.tool_calls.map((tc: any) => ({
-        name: tc.function?.name || tc.name,
-        arguments: typeof tc.function?.arguments === 'string'
-          ? JSON.parse(tc.function.arguments)
-          : (tc.function?.arguments || tc.arguments || {}),
-      }));
+      // Check if this is a retryable error
+      if (isRetryableError(error) && attempt < MAX_RETRIES) {
+        // Calculate delay with exponential backoff
+        const delay = Math.min(
+          INITIAL_RETRY_DELAY * Math.pow(2, attempt),
+          MAX_RETRY_DELAY
+        );
 
-      // Format tool calls as JSON block so parseToolCalls can process them
-      const toolCallsBlock = '\n\n```json\n' + JSON.stringify(toolCallsJson, null, 2) + '\n```\n';
-      content = content ? content + toolCallsBlock : toolCallsBlock;
-    }
+        warning(`Network error (attempt ${attempt + 1}/${MAX_RETRIES + 1}): ${error.message}`);
+        warning(`Retrying in ${delay / 1000} seconds...`);
 
-    // Log token usage
-    if (data.usage) {
-      info(
-        `  Tokens: ${data.usage.prompt_tokens} prompt + ${data.usage.completion_tokens} completion = ${data.usage.total_tokens} total`
-      );
-    }
+        await sleep(delay);
+        continue; // Retry
+      }
 
-    return content;
-  } catch (error: any) {
-    if (error.cause) {
-      throw new Error(`Network error calling OpenAI: ${error.message} (${error.cause})`);
+      // If not retryable or out of retries, throw error
+      if (error.cause) {
+        throw new Error(`Network error calling OpenAI: ${error.message} (${error.cause})`);
+      }
+      throw new Error(`Failed to call OpenAI API: ${error.message}`);
     }
-    throw new Error(`Failed to call OpenAI API: ${error.message}`);
   }
+
+  // This should never be reached, but just in case
+  throw lastError || new Error('Failed to call OpenAI API after retries');
 }
 
 /**
